@@ -39,7 +39,17 @@ return {
 
       -- These are single-key leaders already defined in keymaps.lua —
       -- giving them names makes them show up cleanly in the popup.
-      { "<leader>gb", desc  = "Toggle Line Blame", icon = " " },
+      { "<leader>xx", desc  = "Diagnostics",          icon = " " },
+      { "<leader>xX", desc  = "Buffer Diagnostics",  icon = " " },
+      { "<leader>xt", desc  = "TODOs",               icon = " " },
+      { "<leader>xT", desc  = "TODOs (Quickfix)",    icon = " " },
+      { "<leader>xl", desc  = "Location List",       icon = " " },
+      { "<leader>xq", desc  = "Quickfix List",       icon = " " },
+      { "<leader>cs", desc  = "Symbols",             icon = "󰙴 " },
+      { "<leader>dx", desc  = "Debug: Terminate",    icon = " " },
+      { "<leader>du", desc  = "Debug: Toggle UI",   icon = " " },
+      { "<leader>de", desc  = "Debug: Evaluate",    icon = "󰃢 " },
+      { "<leader>gb", desc  = "Toggle Line Blame",  icon = " " },
       { "<leader>gg", desc  = "Open Neogit",      icon = " " },
       { "<leader>cf", desc  = "Format Buffer",    icon = "󰉢 " },
       { "<leader>w",  desc  = "Save file",        icon = " " },

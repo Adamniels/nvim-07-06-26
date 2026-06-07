@@ -25,14 +25,14 @@ require("config.autocmds")
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
 if not vim.uv.fs_stat(lazypath) then
-  vim.fn.system({
-    "git",
-    "clone",
-    "--filter=blob:none",
-    "https://github.com/folke/lazy.nvim.git",
-    "--branch=stable",
-    lazypath,
-  })
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable",
+		lazypath,
+	})
 end
 
 vim.opt.rtp:prepend(lazypath)
@@ -44,23 +44,25 @@ vim.opt.rtp:prepend(lazypath)
 -- and treat every file it finds as a plugin spec.
 -- When you add a new category, add one line here. That's it.
 require("lazy").setup({
-  { import = "plugins.ui" },
-  { import = "plugins.editor" },
-  { import = "plugins.lsp" },
+	{ import = "plugins.ui" },
+	{ import = "plugins.editor" },
+	{ import = "plugins.lsp" },
+	{ import = "plugins.debug" },
+	{ import = "plugins.ai" },
 }, {
-  -- Don't notify when config files change (reduces noise while editing config)
-  change_detection = { notify = false },
+	-- Don't notify when config files change (reduces noise while editing config)
+	change_detection = { notify = false },
 
-  -- Disable built-in Neovim plugins we don't use
-  performance = {
-    rtp = {
-      disabled_plugins = {
-        "gzip",
-        "tarPlugin",
-        "tohtml",
-        "tutor",
-        "zipPlugin",
-      },
-    },
-  },
+	-- Disable built-in Neovim plugins we don't use
+	performance = {
+		rtp = {
+			disabled_plugins = {
+				"gzip",
+				"tarPlugin",
+				"tohtml",
+				"tutor",
+				"zipPlugin",
+			},
+		},
+	},
 })

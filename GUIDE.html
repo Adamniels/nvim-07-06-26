@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neovim Config Guide</title>
+<style>
+  :root {
+    --bg:        #1a1b26;
+    --bg2:       #16161e;
+    --bg3:       #1f2335;
+    --bg4:       #292e42;
+    --border:    #2f334d;
+    --fg:        #c0caf5;
+    --fg-dim:    #565f89;
+    --blue:      #7aa2f7;
+    --cyan:      #7dcfff;
+    --green:     #9ece6a;
+    --yellow:    #e0af68;
+    --orange:    #ff9e64;
+    --red:       #f7768e;
+    --purple:    #bb9af7;
+    --teal:      #1abc9c;
+    --sidebar-w: 260px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────── */
+  nav {
+    width: var(--sidebar-w);
+    min-height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+    padding: 28px 0 40px;
+  }
+
+  nav .logo {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  nav .logo h1 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  nav .logo p {
+    font-size: 11px;
+    color: var(--fg-dim);
+    margin-top: 2px;
+  }
+
+  nav a {
+    display: block;
+    padding: 5px 20px;
+    color: var(--fg-dim);
+    text-decoration: none;
+    font-size: 13px;
+    border-left: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+  }
+
+  nav a:hover { color: var(--fg); }
+
+  nav a.active {
+    color: var(--blue);
+    border-left-color: var(--blue);
+    background: rgba(122,162,247,.07);
+  }
+
+  nav .nav-section {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    padding: 16px 20px 4px;
+  }
+
+  /* ── Main content ────────────────────────────────────── */
+  main {
+    flex: 1;
+    min-width: 0;
+    padding: 48px 56px 80px;
+    max-width: 900px;
+  }
+
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--blue);
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    color: var(--fg-dim);
+    font-size: 14px;
+    margin-bottom: 48px;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--cyan);
+    margin: 52px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--purple);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin: 28px 0 10px;
+  }
+
+  p { color: var(--fg); margin-bottom: 12px; }
+
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── Code ────────────────────────────────────────────── */
+  code {
+    background: var(--bg4);
+    color: var(--orange);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 13px;
+  }
+
+  pre {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 12px 0 20px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--fg);
+  }
+
+  pre .comment { color: var(--fg-dim); }
+  pre .key     { color: var(--green); }
+  pre .val     { color: var(--orange); }
+  pre .str     { color: var(--green); }
+
+  /* ── Tables ──────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; margin: 4px 0 24px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  thead th {
+    background: var(--bg3);
+    color: var(--fg-dim);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,.02); }
+
+  td {
+    padding: 9px 14px;
+    vertical-align: top;
+  }
+
+  td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--yellow);
+    white-space: nowrap;
+  }
+
+  td:last-child { color: var(--fg); }
+  td:nth-child(2) { color: var(--fg-dim); font-size: 13px; }
+
+  /* ── Keybinding groups ───────────────────────────────── */
+  .kb-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 700px) { .kb-grid { grid-template-columns: 1fr; } }
+
+  .kb-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .kb-card-header {
+    background: var(--bg4);
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--purple);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .kb-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 7px 16px;
+    border-bottom: 1px solid rgba(47,51,77,.5);
+    font-size: 13.5px;
+  }
+
+  .kb-row:last-child { border-bottom: none; }
+
+  .kb-key {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--yellow);
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 130px;
+  }
+
+  .kb-desc { color: var(--fg); }
+
+  /* ── Chips / badges ──────────────────────────────────── */
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-right: 4px;
+  }
+
+  .badge-blue   { background: rgba(122,162,247,.18); color: var(--blue); }
+  .badge-green  { background: rgba(158,206,106,.18); color: var(--green); }
+  .badge-orange { background: rgba(255,158,100,.18); color: var(--orange); }
+  .badge-purple { background: rgba(187,154,247,.18); color: var(--purple); }
+  .badge-red    { background: rgba(247,118,142,.18); color: var(--red); }
+
+  /* ── Structure tree ──────────────────────────────────── */
+  .tree {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 2;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .tree .dir  { color: var(--blue); }
+  .tree .file { color: var(--fg); }
+  .tree .note { color: var(--fg-dim); }
+
+  /* ── Tip box ─────────────────────────────────────────── */
+  .tip {
+    background: rgba(122,162,247,.07);
+    border-left: 3px solid var(--blue);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: var(--fg);
+  }
+
+  .tip strong { color: var(--blue); }
+
+  /* ── Section anchor offset ───────────────────────────── */
+  section { scroll-margin-top: 24px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<nav id="sidebar">
+  <div class="logo">
+    <h1>Neovim Config</h1>
+    <p>Guide &amp; Keybinding Reference</p>
+  </div>
+
+  <div class="nav-section">Overview</div>
+  <a href="#structure">Config Structure</a>
+  <a href="#adding-plugins">Adding a Plugin</a>
+  <a href="#lsp">Managing LSP &amp; Tools</a>
+
+  <div class="nav-section">Keybindings</div>
+  <a href="#kb-general">General</a>
+  <a href="#kb-nav">Navigation &amp; Splits</a>
+  <a href="#kb-buffers">Buffers</a>
+  <a href="#kb-explorer">File Explorer</a>
+  <a href="#kb-find">Find &amp; Grep</a>
+  <a href="#kb-lsp">LSP</a>
+  <a href="#kb-completion">Completion</a>
+  <a href="#kb-git">Git</a>
+  <a href="#kb-debug">Debugging</a>
+  <a href="#kb-diagnostics">Diagnostics</a>
+  <a href="#kb-surround">Surround &amp; Text Objects</a>
+  <a href="#kb-ai">AI Assistant</a>
+  <a href="#kb-folding">Folding</a>
+
+  <div class="nav-section">Reference</div>
+  <a href="#tips">Tips &amp; Commands</a>
+</nav>
+
+<!-- ═══════════════════ MAIN ═══════════════════════ -->
+<main>
+  <h1>Neovim Config Guide</h1>
+  <p class="subtitle">Leader key is <code>&lt;Space&gt;</code> &nbsp;·&nbsp; Built on Neovim 0.12+ &nbsp;·&nbsp; macOS / Kitty</p>
+
+  <!-- ── Structure ── -->
+  <section id="structure">
+    <h2>Config Structure</h2>
+    <p>Everything lives in <code>~/.config/nvim/</code>. Plugins are organized by category — adding a new one is just creating a file in the right folder.</p>
+
+    <div class="tree">
+<span class="dir">~/.config/nvim/</span>
+├── <span class="file">init.lua</span>              <span class="note">Entry point — loads everything in order</span>
+├── <span class="file">GUIDE.html</span>            <span class="note">This file</span>
+├── <span class="file">.gitignore</span>
+├── <span class="file">lazy-lock.json</span>        <span class="note">Plugin lockfile — commit this</span>
+│
+├── <span class="dir">lua/config/</span>
+│   ├── <span class="file">options.lua</span>       <span class="note">Core vim settings</span>
+│   ├── <span class="file">keymaps.lua</span>       <span class="note">Non-plugin keymaps</span>
+│   └── <span class="file">autocmds.lua</span>      <span class="note">Autocommands</span>
+│
+└── <span class="dir">lua/plugins/</span>
+    ├── <span class="dir">ui/</span>               <span class="note">colorscheme, lualine, bufferline, snacks, noice, scrollbar</span>
+    ├── <span class="dir">editor/</span>           <span class="note">treesitter, neo-tree, which-key, mini, gitsigns, neogit, trouble</span>
+    ├── <span class="dir">lsp/</span>              <span class="note">mason, lsp, blink.cmp, conform, lint</span>
+    ├── <span class="dir">debug/</span>            <span class="note">nvim-dap, dap-ui (Python / TS / C# / Rust)</span>
+    └── <span class="dir">ai/</span>               <span class="note">avante.nvim + Claude Sonnet</span>
+    </div>
+
+    <p><strong>How lazy.nvim loads plugins:</strong> <code>init.lua</code> tells lazy to scan each <code>plugins/X/</code> directory. Every <code>.lua</code> file in those directories is treated as a plugin spec automatically.</p>
+  </section>
+
+  <!-- ── Adding plugins ── -->
+  <section id="adding-plugins">
+    <h2>Adding a Plugin</h2>
+    <p>Create a <code>.lua</code> file in the appropriate <code>lua/plugins/X/</code> folder and return a spec table. Restart Neovim — lazy.nvim installs it automatically.</p>
+
+    <pre><span class="comment">-- lua/plugins/editor/my-plugin.lua</span>
+<span class="key">return</span> {
+  <span class="str">"author/plugin-name"</span>,
+  <span class="key">event</span> = <span class="str">"VeryLazy"</span>,   <span class="comment">-- when to load</span>
+  <span class="key">opts</span>  = {            <span class="comment">-- passed to require("plugin-name").setup(opts)</span>
+    some_option = <span class="key">true</span>,
+  },
+}</pre>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>event</td><td>When to load: <code>"VeryLazy"</code>, <code>"BufReadPre"</code>, <code>"InsertEnter"</code></td></tr>
+          <tr><td>cmd</td><td>Load when command runs, e.g. <code>"Neotree"</code></td></tr>
+          <tr><td>keys</td><td>Load when keymap is pressed</td></tr>
+          <tr><td>ft</td><td>Load for specific filetypes only</td></tr>
+          <tr><td>dependencies</td><td>Other plugins that must load first</td></tr>
+          <tr><td>build</td><td>Run once after install: <code>":TSUpdate"</code>, <code>"make"</code></td></tr>
+          <tr><td>opts</td><td>Passed directly to <code>.setup()</code></td></tr>
+          <tr><td>config</td><td>Full setup function when you need more than <code>opts</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── LSP ── -->
+  <section id="lsp">
+    <h2>Managing LSP &amp; Tools</h2>
+
+    <h3>LSP Servers (auto-installed)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Server</th><th>Language</th><th>Managed by</th></tr></thead>
+        <tbody>
+          <tr><td>lua_ls</td><td>Lua</td><td>Mason</td></tr>
+          <tr><td>pyright</td><td>Python</td><td>Mason</td></tr>
+          <tr><td>ts_ls</td><td>TypeScript + JavaScript</td><td>Mason</td></tr>
+          <tr><td>bashls</td><td>Bash</td><td>Mason</td></tr>
+          <tr><td>csharp_ls</td><td>C#</td><td>Mason</td></tr>
+          <tr><td>rust_analyzer</td><td>Rust</td><td>rustup ⚠️</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip"><strong>Rust is special:</strong> rust-analyzer must match your active toolchain. Install it with <code>rustup component add rust-analyzer</code> — never via Mason.</div>
+
+    <p>To add a new server: open <code>:Mason</code>, press <code>i</code> to install, then add it to <code>ensure_installed</code> in <code>mason.lua</code> and configure it in <code>lsp.lua</code>.</p>
+
+    <h3>Formatters &amp; Linters (auto-installed)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tool</th><th>Language</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>stylua</td><td>Lua</td><td>Formatter</td></tr>
+          <tr><td>ruff</td><td>Python</td><td>Formatter + Linter</td></tr>
+          <tr><td>prettier</td><td>TS, JS, JSON, CSS, HTML, Markdown</td><td>Formatter</td></tr>
+          <tr><td>eslint_d</td><td>TypeScript + JavaScript</td><td>Linter</td></tr>
+          <tr><td>csharpier</td><td>C#</td><td>Formatter</td></tr>
+          <tr><td>shfmt</td><td>Bash</td><td>Formatter</td></tr>
+          <tr><td>shellcheck</td><td>Bash</td><td>Linter</td></tr>
+          <tr><td>rustfmt</td><td>Rust</td><td>Formatter — via <code>rustup component add rustfmt</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ════════════════ KEYBINDINGS ════════════════ -->
+
+  <section id="kb-general">
+    <h2>General</h2>
+    <div class="kb-card">
+      <div class="kb-card-header">General</div>
+      <div class="kb-row"><span class="kb-key">&lt;Esc&gt;</span><span class="kb-desc">Clear search highlight</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;w</span><span class="kb-desc">Save file</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;q</span><span class="kb-desc">Quit</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;Q</span><span class="kb-desc">Quit all</span></div>
+      <div class="kb-row"><span class="kb-key">J</span><span class="kb-desc">Join lines (cursor stays in place)</span></div>
+      <div class="kb-row"><span class="kb-key">n / N</span><span class="kb-desc">Next / prev search result (centered)</span></div>
+    </div>
+  </section>
+
+  <section id="kb-nav">
+    <h2>Navigation &amp; Splits</h2>
+    <div class="kb-grid">
+      <div class="kb-card">
+        <div class="kb-card-header">Motion</div>
+        <div class="kb-row"><span class="kb-key">j / k</span><span class="kb-desc">Move by visual line (wraps correctly)</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;C-h&gt;</span><span class="kb-desc">Focus left split</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;C-j&gt;</span><span class="kb-desc">Focus lower split</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;C-k&gt;</span><span class="kb-desc">Focus upper split</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;C-l&gt;</span><span class="kb-desc">Focus right split</span></div>
+      </div>
+      <div class="kb-card">
+        <div class="kb-card-header">Splits</div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;sv</span><span class="kb-desc">Split vertically</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;sh</span><span class="kb-desc">Split horizontally</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;sd</span><span class="kb-desc">Close split</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;se</span><span class="kb-desc">Equalize split sizes</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kb-buffers">
+    <h2>Buffers</h2>
+    <div class="kb-card">
+      <div class="kb-card-header">Buffer Management</div>
+      <div class="kb-row"><span class="kb-key">&lt;S-h&gt;</span><span class="kb-desc">Previous buffer</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;S-l&gt;</span><span class="kb-desc">Next buffer</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;,</span><span class="kb-desc">Switch buffer (fuzzy picker)</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;bd</span><span class="kb-desc">Close buffer</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;bD</span><span class="kb-desc">Force close buffer</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;bo</span><span class="kb-desc">Close all other buffers</span></div>
+    </div>
+
+    <h3>Visual Mode</h3>
+    <div class="kb-card">
+      <div class="kb-card-header">Visual</div>
+      <div class="kb-row"><span class="kb-key">J / K</span><span class="kb-desc">Move selection down / up</span></div>
+      <div class="kb-row"><span class="kb-key">&lt; / &gt;</span><span class="kb-desc">Indent left / right (stay in visual)</span></div>
+      <div class="kb-row"><span class="kb-key">p</span><span class="kb-desc">Paste without overwriting clipboard</span></div>
+    </div>
+  </section>
+
+  <section id="kb-explorer">
+    <h2>File Explorer</h2>
+    <div class="kb-grid">
+      <div class="kb-card">
+        <div class="kb-card-header">Open / Close</div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;e</span><span class="kb-desc">Toggle sidebar</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;E</span><span class="kb-desc">Reveal current file</span></div>
+      </div>
+      <div class="kb-card">
+        <div class="kb-card-header">Inside neo-tree</div>
+        <div class="kb-row"><span class="kb-key">l / Enter</span><span class="kb-desc">Open / expand</span></div>
+        <div class="kb-row"><span class="kb-key">h</span><span class="kb-desc">Collapse directory</span></div>
+        <div class="kb-row"><span class="kb-key">a</span><span class="kb-desc">New file (add / for directory)</span></div>
+        <div class="kb-row"><span class="kb-key">d / r / m</span><span class="kb-desc">Delete / rename / move</span></div>
+        <div class="kb-row"><span class="kb-key">sv / sh</span><span class="kb-desc">Open in vertical / horizontal split</span></div>
+        <div class="kb-row"><span class="kb-key">?</span><span class="kb-desc">Show all keymaps</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kb-find">
+    <h2>Find &amp; Grep</h2>
+    <div class="kb-card">
+      <div class="kb-card-header">Snacks Picker</div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;&lt;Space&gt;</span><span class="kb-desc">Smart find (files + recent)</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;ff</span><span class="kb-desc">Find files</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;fr</span><span class="kb-desc">Recent files</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;fc</span><span class="kb-desc">Find in Neovim config</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;/</span><span class="kb-desc">Live grep across project</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;fw</span><span class="kb-desc">Grep word under cursor / selection</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;fs</span><span class="kb-desc">LSP symbols in current file</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;fS</span><span class="kb-desc">LSP symbols across workspace</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;ft</span><span class="kb-desc">Floating terminal</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;C-\&gt;</span><span class="kb-desc">Toggle terminal (normal + terminal mode)</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;n</span><span class="kb-desc">Notification history</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;:</span><span class="kb-desc">Command history</span></div>
+    </div>
+  </section>
+
+  <section id="kb-lsp">
+    <h2>LSP</h2>
+    <div class="kb-grid">
+      <div class="kb-card">
+        <div class="kb-card-header">Navigation</div>
+        <div class="kb-row"><span class="kb-key">gd</span><span class="kb-desc">Go to definition</span></div>
+        <div class="kb-row"><span class="kb-key">gD</span><span class="kb-desc">Go to declaration</span></div>
+        <div class="kb-row"><span class="kb-key">gi</span><span class="kb-desc">Go to implementation</span></div>
+        <div class="kb-row"><span class="kb-key">gy</span><span class="kb-desc">Go to type definition</span></div>
+        <div class="kb-row"><span class="kb-key">gr</span><span class="kb-desc">Find all references</span></div>
+      </div>
+      <div class="kb-card">
+        <div class="kb-card-header">Actions</div>
+        <div class="kb-row"><span class="kb-key">K</span><span class="kb-desc">Hover documentation</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;C-k&gt;</span><span class="kb-desc">Signature help</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ca</span><span class="kb-desc">Code action</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;cr</span><span class="kb-desc">Rename symbol</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;cw</span><span class="kb-desc">Workspace symbols</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;cf</span><span class="kb-desc">Format buffer</span></div>
+      </div>
+    </div>
+    <div class="kb-card" style="margin-top:16px">
+      <div class="kb-card-header">Diagnostics</div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;cd</span><span class="kb-desc">Show diagnostic in floating window</span></div>
+      <div class="kb-row"><span class="kb-key">[d / ]d</span><span class="kb-desc">Prev / next diagnostic</span></div>
+      <div class="kb-row"><span class="kb-key">[e / ]e</span><span class="kb-desc">Prev / next error</span></div>
+    </div>
+  </section>
+
+  <section id="kb-completion">
+    <h2>Completion</h2>
+    <div class="kb-card">
+      <div class="kb-card-header">blink.cmp</div>
+      <div class="kb-row"><span class="kb-key">&lt;C-Space&gt;</span><span class="kb-desc">Open / refresh completion menu</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;C-n&gt; / &lt;C-p&gt;</span><span class="kb-desc">Next / prev item</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;Tab&gt; / &lt;S-Tab&gt;</span><span class="kb-desc">Next / prev item (or jump snippet placeholder)</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;C-y&gt;</span><span class="kb-desc">Accept selected item</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;C-e&gt;</span><span class="kb-desc">Dismiss menu</span></div>
+    </div>
+  </section>
+
+  <section id="kb-git">
+    <h2>Git</h2>
+    <div class="kb-grid">
+      <div class="kb-card">
+        <div class="kb-card-header">Hunk Navigation</div>
+        <div class="kb-row"><span class="kb-key">]h / [h</span><span class="kb-desc">Next / prev hunk</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ghp</span><span class="kb-desc">Preview hunk diff</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ghb</span><span class="kb-desc">Blame current line</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;gb</span><span class="kb-desc">Toggle inline blame</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ghd</span><span class="kb-desc">Diff file against HEAD</span></div>
+      </div>
+      <div class="kb-card">
+        <div class="kb-card-header">Hunk Actions</div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ghs</span><span class="kb-desc">Stage hunk</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ghr</span><span class="kb-desc">Reset (discard) hunk</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ghS</span><span class="kb-desc">Stage entire file</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ghR</span><span class="kb-desc">Reset entire file</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ghu</span><span class="kb-desc">Undo last stage</span></div>
+        <div class="kb-row"><span class="kb-key">ih</span><span class="kb-desc">Text object: inner hunk</span></div>
+      </div>
+    </div>
+    <div class="kb-card" style="margin-top:16px">
+      <div class="kb-card-header">Neogit (full Git UI)</div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;gg</span><span class="kb-desc">Open Neogit</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;gl</span><span class="kb-desc">Git log (picker)</span></div>
+      <div class="kb-row"><span class="kb-key">&lt;leader&gt;gf</span><span class="kb-desc">Git log for current file</span></div>
+      <div class="kb-row"><span class="kb-key">s / u / c / P / p / ?</span><span class="kb-desc">Inside Neogit: stage / unstage / commit / push / pull / help</span></div>
+    </div>
+  </section>
+
+  <section id="kb-debug">
+    <h2>Debugging</h2>
+    <div class="kb-grid">
+      <div class="kb-card">
+        <div class="kb-card-header">Execution</div>
+        <div class="kb-row"><span class="kb-key">&lt;F5&gt;</span><span class="kb-desc">Continue / start session</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;F10&gt;</span><span class="kb-desc">Step over</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;F11&gt;</span><span class="kb-desc">Step into</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;F12&gt;</span><span class="kb-desc">Step out</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;dx</span><span class="kb-desc">Terminate session</span></div>
+      </div>
+      <div class="kb-card">
+        <div class="kb-card-header">Breakpoints &amp; UI</div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;db</span><span class="kb-desc">Toggle breakpoint</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;dB</span><span class="kb-desc">Conditional breakpoint</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;dl</span><span class="kb-desc">Run last session again</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;dr</span><span class="kb-desc">Open REPL</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;du</span><span class="kb-desc">Toggle UI panels</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;de</span><span class="kb-desc">Evaluate expression under cursor</span></div>
+      </div>
+    </div>
+    <div class="tip"><strong>Adapters installed:</strong> Python (debugpy), TypeScript/JavaScript (js-debug-adapter), C# (netcoredbg), Rust (codelldb)</div>
+  </section>
+
+  <section id="kb-diagnostics">
+    <h2>Diagnostics &amp; Symbols</h2>
+    <div class="kb-grid">
+      <div class="kb-card">
+        <div class="kb-card-header">Trouble Panel</div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;xx</span><span class="kb-desc">All diagnostics (project)</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;xX</span><span class="kb-desc">Diagnostics for current buffer</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;xl</span><span class="kb-desc">Location list</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;xq</span><span class="kb-desc">Quickfix list</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;xt</span><span class="kb-desc">All TODOs (Trouble)</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;xT</span><span class="kb-desc">All TODOs (quickfix)</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;cs</span><span class="kb-desc">Document symbols (outline)</span></div>
+        <div class="kb-row"><span class="kb-key">]q / [q</span><span class="kb-desc">Next / prev Trouble item</span></div>
+      </div>
+      <div class="kb-card">
+        <div class="kb-card-header">TODO Comments</div>
+        <div class="kb-row"><span class="kb-key">]t / [t</span><span class="kb-desc">Next / prev TODO comment</span></div>
+        <div class="kb-row" style="padding-top:12px;flex-wrap:wrap;gap:6px;">
+          <span class="badge badge-red">FIXME</span>
+          <span class="badge badge-blue">TODO</span>
+          <span class="badge badge-orange">HACK</span>
+          <span class="badge badge-orange">WARN</span>
+          <span class="badge badge-purple">PERF</span>
+          <span class="badge badge-green">NOTE</span>
+          <span class="badge badge-green">TEST</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kb-surround">
+    <h2>Surround &amp; Text Objects</h2>
+    <div class="kb-grid">
+      <div class="kb-card">
+        <div class="kb-card-header">mini.surround</div>
+        <div class="kb-row"><span class="kb-key">sa{motion}{char}</span><span class="kb-desc">Add surround — <code>saiwq</code> wraps word in <code>'</code></span></div>
+        <div class="kb-row"><span class="kb-key">sd{char}</span><span class="kb-desc">Delete surround — <code>sd"</code> removes <code>"..."</code></span></div>
+        <div class="kb-row"><span class="kb-key">sr{old}{new}</span><span class="kb-desc">Replace surround — <code>sr'"</code> changes <code>'</code> to <code>"</code></span></div>
+      </div>
+      <div class="kb-card">
+        <div class="kb-card-header">mini.ai Text Objects</div>
+        <div class="kb-row"><span class="kb-key">f</span><span class="kb-desc">Function call or body</span></div>
+        <div class="kb-row"><span class="kb-key">c</span><span class="kb-desc">Class body</span></div>
+        <div class="kb-row"><span class="kb-key">a</span><span class="kb-desc">Function argument</span></div>
+        <div class="kb-row"><span class="kb-key">q</span><span class="kb-desc">Any quote <code>" ' `</code></span></div>
+        <div class="kb-row"><span class="kb-key">b</span><span class="kb-desc">Any bracket <code>( [ {</code></span></div>
+        <div class="kb-row"><span class="kb-key">t</span><span class="kb-desc">HTML / JSX tag</span></div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--fg-dim);margin-top:4px">Use with <code>a</code> (around) or <code>i</code> (inside) + any operator. Examples: <code>daa</code> delete argument, <code>ciq</code> change inside quote, <code>vaf</code> select function.</p>
+  </section>
+
+  <section id="kb-ai">
+    <h2>AI Assistant (avante.nvim + Claude)</h2>
+    <div class="kb-grid">
+      <div class="kb-card">
+        <div class="kb-card-header">Sidebar</div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;aa</span><span class="kb-desc">Toggle AI sidebar</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ae</span><span class="kb-desc">Edit selection with AI (visual)</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;ar</span><span class="kb-desc">Refresh / retry</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;leader&gt;af</span><span class="kb-desc">Focus sidebar</span></div>
+        <div class="kb-row"><span class="kb-key">&lt;CR&gt; / &lt;C-s&gt;</span><span class="kb-desc">Submit message (normal / insert mode)</span></div>
+      </div>
+      <div class="kb-card">
+        <div class="kb-card-header">Applying Suggestions</div>
+        <div class="kb-row"><span class="kb-key">co</span><span class="kb-desc">Keep our version</span></div>
+        <div class="kb-row"><span class="kb-key">ct</span><span class="kb-desc">Accept AI version</span></div>
+        <div class="kb-row"><span class="kb-key">cb</span><span class="kb-desc">Keep both</span></div>
+        <div class="kb-row"><span class="kb-key">ca</span><span class="kb-desc">Accept all AI changes</span></div>
+        <div class="kb-row"><span class="kb-key">]x / [x</span><span class="kb-desc">Next / prev diff</span></div>
+      </div>
+    </div>
+    <div class="tip"><strong>Setup:</strong> Add <code>export ANTHROPIC_API_KEY="sk-ant-..."</code> to your <code>~/.zshrc</code> and run <code>source ~/.zshrc</code>.</div>
+  </section>
+
+  <section id="kb-folding">
+    <h2>Folding</h2>
+    <p>Folding is treesitter-based — structure-aware, not indent-based. Files open with all folds expanded.</p>
+    <div class="kb-card">
+      <div class="kb-card-header">Folds</div>
+      <div class="kb-row"><span class="kb-key">za</span><span class="kb-desc">Toggle fold under cursor</span></div>
+      <div class="kb-row"><span class="kb-key">zR</span><span class="kb-desc">Open all folds</span></div>
+      <div class="kb-row"><span class="kb-key">zM</span><span class="kb-desc">Close all folds</span></div>
+      <div class="kb-row"><span class="kb-key">zo / zc</span><span class="kb-desc">Open / close fold</span></div>
+    </div>
+  </section>
+
+  <!-- ── Tips ── -->
+  <section id="tips">
+    <h2>Tips &amp; Useful Commands</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Command / Key</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>:Lazy</td><td>Open plugin manager — install, update, profile</td></tr>
+          <tr><td>:Lazy update</td><td>Update all plugins</td></tr>
+          <tr><td>:Mason</td><td>Open tool installer — LSP servers, formatters, linters</td></tr>
+          <tr><td>:MasonUpdate</td><td>Update all installed Mason packages</td></tr>
+          <tr><td>:ConformInfo</td><td>Show which formatter is active for the current buffer</td></tr>
+          <tr><td>:TSUpdate</td><td>Update all treesitter parsers</td></tr>
+          <tr><td>:lua vim.g.disable_autoformat = true</td><td>Disable format on save for this session</td></tr>
+          <tr><td>:lua vim.b.disable_autoformat = true</td><td>Disable format on save for this buffer only</td></tr>
+          <tr><td>:lua vim.print(vim.lsp.get_clients({bufnr=0}))</td><td>Show active LSP servers for current buffer</td></tr>
+          <tr><td>]] / [[</td><td>Jump to next / prev occurrence of word under cursor</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  // Highlight active nav link based on scroll position
+  const links = document.querySelectorAll('nav a');
+  const sections = document.querySelectorAll('section');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
