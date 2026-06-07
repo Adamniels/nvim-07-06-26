@@ -1,0 +1,20 @@
+# =============================================================================
+# Neovim config .gitignore
+# =============================================================================
+
+# macOS
+.DS_Store
+
+# Neovim session and state files
+Session.vim
+*.log
+
+# lazy-lock.json pins every plugin to an exact commit, like package-lock.json.
+# Committing it gives you reproducible installs across machines.
+# Ignoring it means you always get the latest versions on a fresh clone.
+# Recommendation: commit it.
+# Uncomment the line below if you'd rather not track it:
+# lazy-lock.json
+
+# Generated help tags (created by :helptags, not hand-written)
+doc/tags

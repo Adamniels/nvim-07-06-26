@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Adam's Neovim Config Plan</title>
+<style>
+  :root {
+    --bg:       #1a1b26;
+    --bg2:      #16161e;
+    --bg3:      #1f2335;
+    --surface:  #24283b;
+    --border:   #2f3549;
+    --fg:       #c0caf5;
+    --fg2:      #a9b1d6;
+    --comment:  #565f89;
+    --blue:     #7aa2f7;
+    --cyan:     #7dcfff;
+    --green:    #9ece6a;
+    --yellow:   #e0af68;
+    --orange:   #ff9e64;
+    --red:      #f7768e;
+    --purple:   #bb9af7;
+    --teal:     #1abc9c;
+    --radius:   8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Menlo', 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 0;
+  }
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 48px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header h1 { font-size: 22px; color: var(--blue); letter-spacing: 0.5px; }
+  header p  { color: var(--comment); font-size: 12px; margin-top: 4px; }
+  nav {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    width: 240px;
+    position: fixed;
+    top: 89px;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 24px 0;
+  }
+  nav a {
+    display: block;
+    padding: 6px 24px;
+    color: var(--fg2);
+    text-decoration: none;
+    font-size: 12px;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  nav a:hover, nav a.active { color: var(--blue); border-left-color: var(--blue); background: var(--bg3); }
+  nav .nav-section { color: var(--comment); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 16px 24px 4px; }
+  main { margin-left: 240px; padding: 40px 56px; max-width: 1100px; }
+  section { margin-bottom: 60px; scroll-margin-top: 100px; }
+  h2 {
+    font-size: 18px;
+    color: var(--blue);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .icon { font-size: 16px; }
+  h3 { font-size: 14px; color: var(--cyan); margin: 24px 0 10px; }
+  h4 { font-size: 13px; color: var(--yellow); margin: 16px 0 8px; }
+  p { color: var(--fg2); margin-bottom: 10px; }
+  a { color: var(--blue); }
+  code {
+    background: var(--surface);
+    color: var(--cyan);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+  }
+  pre {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    overflow-x: auto;
+    margin: 12px 0;
+    position: relative;
+  }
+  pre code {
+    background: none;
+    color: var(--fg);
+    padding: 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .kw  { color: var(--purple); }
+  .str { color: var(--green); }
+  .cmt { color: var(--comment); }
+  .fn  { color: var(--blue); }
+  .num { color: var(--orange); }
+  .key { color: var(--cyan); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  th {
+    background: var(--surface);
+    color: var(--blue);
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--fg2);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg3); }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-green  { background: #1a2e1a; color: var(--green); border: 1px solid #2d4a2d; }
+  .badge-blue   { background: #1a1f2e; color: var(--blue);  border: 1px solid #2a3050; }
+  .badge-yellow { background: #2e2a1a; color: var(--yellow); border: 1px solid #4a421a; }
+  .badge-red    { background: #2e1a1a; color: var(--red);   border: 1px solid #4a2a2a; }
+  .badge-purple { background: #261a2e; color: var(--purple); border: 1px solid #3d2a4a; }
+  .badge-orange { background: #2e231a; color: var(--orange); border: 1px solid #4a3620; }
+  .callout {
+    border-left: 3px solid var(--blue);
+    background: var(--bg3);
+    padding: 14px 18px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 14px 0;
+    font-size: 13px;
+    color: var(--fg2);
+  }
+  .callout.warn { border-left-color: var(--yellow); }
+  .callout.tip  { border-left-color: var(--green); }
+  .callout.red  { border-left-color: var(--red); }
+  .callout strong { color: var(--fg); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .card h4 { margin-top: 0; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .step-num {
+    background: var(--blue);
+    color: var(--bg);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body h4 { margin-top: 0; }
+  .kb-table td:first-child { color: var(--cyan); font-family: monospace; white-space: nowrap; }
+  .kb-table td:last-child  { color: var(--comment); font-size: 12px; }
+  .risk-row td:first-child { color: var(--yellow); }
+  .file-tree {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+  .file-tree .dir  { color: var(--blue); }
+  .file-tree .file { color: var(--fg2); }
+  .file-tree .cmt  { color: var(--comment); }
+  .approval-box {
+    background: var(--bg3);
+    border: 2px solid var(--green);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin: 40px 0;
+    text-align: center;
+  }
+  .approval-box h3 { color: var(--green); margin-bottom: 8px; }
+  .approval-box p  { font-size: 13px; }
+  .roadmap-phase {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--blue);
+  }
+  .roadmap-phase.phase-2 { border-left-color: var(--purple); }
+  .roadmap-phase.phase-3 { border-left-color: var(--cyan); }
+  .roadmap-phase.phase-4 { border-left-color: var(--green); }
+  .roadmap-phase.phase-5 { border-left-color: var(--yellow); }
+  .roadmap-phase.phase-6 { border-left-color: var(--orange); }
+  .roadmap-phase.phase-7 { border-left-color: var(--teal); }
+  .roadmap-phase h4 { margin-top: 0; color: var(--fg); }
+  .roadmap-phase ul { padding-left: 20px; color: var(--fg2); font-size: 13px; }
+  .roadmap-phase ul li { margin-bottom: 4px; }
+  .phase-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--comment);
+    margin-bottom: 6px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Adam's Neovim Configuration Plan</h1>
+  <p>Neovim 0.12.2 · macOS · Kitty · tmux · MesloLGL Nerd Font · Generated 2026-06-06</p>
+</header>
+
+<nav>
+  <div class="nav-section">Overview</div>
+  <a href="#goals">Goals</a>
+  <a href="#answers">Your Answers</a>
+  <div class="nav-section">Architecture</div>
+  <a href="#structure">File Structure</a>
+  <a href="#plugin-manager">Plugin Manager</a>
+  <a href="#plugins">Plugin Choices</a>
+  <div class="nav-section">Setup</div>
+  <a href="#lsp">LSP Setup</a>
+  <a href="#completion">Completion</a>
+  <a href="#formatting">Formatting &amp; Linting</a>
+  <a href="#debugging">Debugging</a>
+  <a href="#git">Git Integration</a>
+  <a href="#ui">UI &amp; Theme</a>
+  <a href="#navigation">File Navigation</a>
+  <a href="#keybindings">Keybindings</a>
+  <a href="#languages">Language Support</a>
+  <a href="#terminal">Terminal</a>
+  <a href="#ai">AI Tooling</a>
+  <div class="nav-section">Delivery</div>
+  <a href="#install">Installation Steps</a>
+  <a href="#risks">Risks &amp; Tradeoffs</a>
+  <a href="#roadmap">Implementation Roadmap</a>
+  <a href="#approval">Approval</a>
+</nav>
+
+<main>
+
+<!-- GOALS -->
+<section id="goals">
+  <h2><span class="icon">🎯</span> Goals</h2>
+  <p>Build a clean, modern, maintainable Neovim configuration from scratch that serves as a professional development environment for a polyglot programmer working across C#, Python, TypeScript, Rust, Lua, and Bash. The config should:</p>
+  <ul style="padding-left:20px; color:var(--fg2); line-height:2;">
+    <li>Use only current, non-deprecated APIs (Neovim 0.11+ native LSP, no legacy lspconfig framework)</li>
+    <li>Be understandable — no magic, every decision documented with a reason</li>
+    <li>Be easy to extend — adding a new language should take 5 minutes</li>
+    <li>Be reliable — prefer battle-tested plugins over novelty</li>
+    <li>Match VSCode muscle memory where it makes sense, without being a VSCode clone</li>
+    <li>Teach Neovim Lua config patterns as we build it</li>
+  </ul>
+</section>
+
+<!-- ANSWERS -->
+<section id="answers">
+  <h2><span class="icon">📋</span> Your Answers &amp; Preferences</h2>
+  <table>
+    <tr><th>Topic</th><th>Your Answer</th></tr>
+    <tr><td>Languages</td><td>C#, Python, TypeScript, Rust, Lua, Bash — add more as needed</td></tr>
+    <tr><td>LSP management</td><td>Mason (in-Neovim manager) for all except Rust (rustup)</td></tr>
+    <tr><td>Project types</td><td>Large platform, Unity game, misc smaller repos</td></tr>
+    <tr><td>Collaboration</td><td>70% solo, 30% collaborative</td></tr>
+    <tr><td>OS</td><td>macOS</td></tr>
+    <tr><td>Terminal</td><td>Kitty</td></tr>
+    <tr><td>Multiplexer</td><td>tmux — Neovim does NOT need tmux awareness</td></tr>
+    <tr><td>Neovim version</td><td>0.12.2 (Homebrew)</td></tr>
+    <tr><td>Modal experience</td><td>~2 years, comfortable</td></tr>
+    <tr><td>Prior editors</td><td>VSCode (still use alongside)</td></tr>
+    <tr><td>Distros tried</td><td>None — starting clean</td></tr>
+    <tr><td>UI style</td><td>Feature-rich (statusline, bufferline, explorer, etc.)</td></tr>
+    <tr><td>Theme</td><td>Dark — TokyoNight Night recommended</td></tr>
+    <tr><td>Nerd Font</td><td>MesloLGL Nerd Font installed ✓</td></tr>
+    <tr><td>Leader key</td><td><code>&lt;Space&gt;</code></td></tr>
+    <tr><td>Statusline</td><td>Full — mode, git, LSP status, diagnostics, filetype</td></tr>
+    <tr><td>File explorer</td><td>Both sidebar AND picker on demand</td></tr>
+    <tr><td>Bufferline</td><td>Yes</td></tr>
+    <tr><td>Dashboard</td><td>Yes (easy to disable)</td></tr>
+    <tr><td>Debugger</td><td>Yes — C#, Python, TypeScript, Rust</td></tr>
+    <tr><td>AI tooling</td><td>Yes — avante.nvim with Claude (see AI section)</td></tr>
+    <tr><td>tmux nav integration</td><td>Not needed — handled outside Neovim</td></tr>
+  </table>
+</section>
+
+<!-- FILE STRUCTURE -->
+<section id="structure">
+  <h2><span class="icon">📁</span> File &amp; Folder Structure</h2>
+  <p>Clean separation of concerns. Each plugin gets its own file. No monolithic config files.</p>
+  <div class="file-tree">
+<span class="dir">~/.config/nvim/</span><br>
+├── <span class="file">init.lua</span>                    <span class="cmt">-- entry point, loads config/ then lazy</span><br>
+├── <span class="file">lazy-lock.json</span>              <span class="cmt">-- auto-generated lockfile (commit this)</span><br>
+└── <span class="dir">lua/</span><br>
+    ├── <span class="dir">config/</span>                     <span class="cmt">-- core vim settings (no plugins)</span><br>
+    │   ├── <span class="file">options.lua</span>             <span class="cmt">-- vim.opt.*, UI options</span><br>
+    │   ├── <span class="file">keymaps.lua</span>             <span class="cmt">-- non-plugin keymaps</span><br>
+    │   └── <span class="file">autocmds.lua</span>            <span class="cmt">-- autocommands (highlight on yank, etc)</span><br>
+    └── <span class="dir">plugins/</span>                    <span class="cmt">-- one file per plugin or category</span><br>
+        ├── <span class="dir">ui/</span><br>
+        │   ├── <span class="file">colorscheme.lua</span>     <span class="cmt">-- tokyonight</span><br>
+        │   ├── <span class="file">lualine.lua</span>         <span class="cmt">-- statusline</span><br>
+        │   ├── <span class="file">bufferline.lua</span>      <span class="cmt">-- tab bar</span><br>
+        │   ├── <span class="file">dashboard.lua</span>       <span class="cmt">-- start screen (snacks.dashboard)</span><br>
+        │   └── <span class="file">noice.lua</span>           <span class="cmt">-- command line / notifications UI</span><br>
+        ├── <span class="dir">editor/</span><br>
+        │   ├── <span class="file">treesitter.lua</span>      <span class="cmt">-- syntax, folding, indentation</span><br>
+        │   ├── <span class="file">neo-tree.lua</span>        <span class="cmt">-- sidebar file explorer</span><br>
+        │   ├── <span class="file">snacks.lua</span>          <span class="cmt">-- picker, terminal, words, indent, bigfile</span><br>
+        │   ├── <span class="file">gitsigns.lua</span>        <span class="cmt">-- inline git hunk indicators</span><br>
+        │   ├── <span class="file">neogit.lua</span>          <span class="cmt">-- git status / commit UI</span><br>
+        │   ├── <span class="file">which-key.lua</span>       <span class="cmt">-- keybinding hints popup</span><br>
+        │   └── <span class="file">mini.lua</span>            <span class="cmt">-- mini.pairs, mini.surround, mini.ai</span><br>
+        ├── <span class="dir">lsp/</span><br>
+        │   ├── <span class="file">mason.lua</span>           <span class="cmt">-- package manager for servers/tools</span><br>
+        │   └── <span class="file">lspconfig.lua</span>       <span class="cmt">-- vim.lsp.config + vim.lsp.enable calls</span><br>
+        ├── <span class="file">completion.lua</span>          <span class="cmt">-- blink.cmp</span><br>
+        ├── <span class="file">formatting.lua</span>          <span class="cmt">-- conform.nvim</span><br>
+        ├── <span class="file">linting.lua</span>             <span class="cmt">-- nvim-lint</span><br>
+        ├── <span class="file">debugging.lua</span>           <span class="cmt">-- nvim-dap + nvim-dap-ui</span><br>
+        └── <span class="file">ai.lua</span>                  <span class="cmt">-- avante.nvim</span><br>
+  </div>
+  <div class="callout tip">
+    <strong>Why this structure?</strong> lazy.nvim automatically scans <code>lua/plugins/</code> for any <code>.lua</code> files and loads them. You never have to manually import plugin files — just create a file and it gets picked up. The <code>config/</code> folder is loaded explicitly from <code>init.lua</code> before lazy starts.
+  </div>
+</section>
+
+<!-- PLUGIN MANAGER -->
+<section id="plugin-manager">
+  <h2><span class="icon">📦</span> Plugin Manager: lazy.nvim</h2>
+  <p><strong>Choice: lazy.nvim</strong> — the current standard. Used by LazyVim, AstroNvim, and most modern configs.</p>
+  <div class="grid-2">
+    <div class="card">
+      <h4>Why lazy.nvim</h4>
+      <ul style="padding-left:18px; color:var(--fg2); font-size:13px;">
+        <li>Lazy-loads plugins by event, command, or keymap — fast startup</li>
+        <li>Beautiful UI (<code>:Lazy</code>) showing load times per plugin</li>
+        <li>Lockfile (<code>lazy-lock.json</code>) for reproducible installs</li>
+        <li>First-class support for local plugins and dev mode</li>
+        <li>Actively maintained by the same author as many top plugins</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Alternatives considered</h4>
+      <ul style="padding-left:18px; color:var(--fg2); font-size:13px;">
+        <li><strong>packer.nvim</strong> — archived, do not use</li>
+        <li><strong>vim-plug</strong> — still works, but no lazy-loading, Vimscript</li>
+        <li><strong>rocks.nvim</strong> — interesting future, not yet mainstream</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>Bootstrap pattern:</strong> lazy.nvim installs itself on first launch via a short snippet in <code>init.lua</code>. No manual install step needed.
+  </div>
+</section>
+
+<!-- PLUGINS -->
+<section id="plugins">
+  <h2><span class="icon">🔌</span> Plugin Choices</h2>
+  <table>
+    <tr><th>Category</th><th>Plugin</th><th>Status</th><th>Why</th></tr>
+    <tr><td>Plugin manager</td><td><code>folke/lazy.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>The modern standard</td></tr>
+    <tr><td>Colorscheme</td><td><code>folke/tokyonight.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>Dark, modern, excellent plugin support</td></tr>
+    <tr><td>Statusline</td><td><code>nvim-lualine/lualine.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>Fast, highly configurable, great defaults</td></tr>
+    <tr><td>Bufferline</td><td><code>akinsho/bufferline.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>Best bufferline, VSCode-like</td></tr>
+    <tr><td>Dashboard + utilities</td><td><code>folke/snacks.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>All-in-one: dashboard, picker, terminal, indent, words, bigfile, notifier</td></tr>
+    <tr><td>Command UI</td><td><code>folke/noice.nvim</code></td><td><span class="badge badge-blue">Recommended</span></td><td>Replaces command line, search, messages with floating UI</td></tr>
+    <tr><td>Sidebar explorer</td><td><code>nvim-neo-tree/neo-tree.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>Persistent sidebar with git status, icons, diagnostics</td></tr>
+    <tr><td>Syntax / indents</td><td><code>nvim-treesitter/nvim-treesitter</code></td><td><span class="badge badge-green">Essential</span></td><td>Accurate syntax, folding, indent for all languages</td></tr>
+    <tr><td>LSP data source</td><td><code>neovim/nvim-lspconfig</code></td><td><span class="badge badge-green">Essential</span></td><td>Provides server configs — used with <code>vim.lsp.config</code> NOT <code>require('lspconfig')</code></td></tr>
+    <tr><td>LSP tool installer</td><td><code>mason-org/mason.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>Install LSP servers, formatters, linters from within Neovim</td></tr>
+    <tr><td>Mason ↔ LSP bridge</td><td><code>mason-org/mason-lspconfig.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>Ensures installed servers are auto-enabled</td></tr>
+    <tr><td>Completion</td><td><code>saghen/blink.cmp</code></td><td><span class="badge badge-green">Essential</span></td><td>Faster and better than nvim-cmp, built-in snippet support</td></tr>
+    <tr><td>Snippet collection</td><td><code>rafamadriz/friendly-snippets</code></td><td><span class="badge badge-blue">Recommended</span></td><td>Large library of VS Code-compatible snippets</td></tr>
+    <tr><td>Formatting</td><td><code>stevearc/conform.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>Format-on-save, per-filetype formatters, async</td></tr>
+    <tr><td>Linting</td><td><code>mfussenegger/nvim-lint</code></td><td><span class="badge badge-green">Essential</span></td><td>Async linting on save, complements conform</td></tr>
+    <tr><td>Git hunks</td><td><code>lewis6991/gitsigns.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>Inline git blame, hunk navigation, stage hunks in buffer</td></tr>
+    <tr><td>Git UI</td><td><code>NeogitOrg/neogit</code></td><td><span class="badge badge-blue">Recommended</span></td><td>Magit-like git status, commits, branches — keyboard-driven</td></tr>
+    <tr><td>Debugger core</td><td><code>mfussenegger/nvim-dap</code></td><td><span class="badge badge-green">Essential</span></td><td>Debug Adapter Protocol client</td></tr>
+    <tr><td>Debugger UI</td><td><code>rcarriga/nvim-dap-ui</code></td><td><span class="badge badge-green">Essential</span></td><td>Scopes, watches, call stack, breakpoints panes</td></tr>
+    <tr><td>Mason ↔ DAP</td><td><code>jay-babu/mason-nvim-dap.nvim</code></td><td><span class="badge badge-blue">Recommended</span></td><td>Auto-installs debug adapters via Mason</td></tr>
+    <tr><td>AI assistant</td><td><code>yetone/avante.nvim</code></td><td><span class="badge badge-blue">Recommended</span></td><td>Cursor-like AI sidebar + inline edits using Claude API</td></tr>
+    <tr><td>Keybinding hints</td><td><code>folke/which-key.nvim</code></td><td><span class="badge badge-green">Essential</span></td><td>Shows available keybindings after pressing leader — invaluable</td></tr>
+    <tr><td>Pairs / surround / text-objects</td><td><code>echasnovski/mini.nvim</code></td><td><span class="badge badge-blue">Recommended</span></td><td>mini.pairs, mini.surround, mini.ai — tiny, fast, no dependencies</td></tr>
+    <tr><td>Icons</td><td><code>nvim-tree/nvim-web-devicons</code></td><td><span class="badge badge-green">Essential</span></td><td>Required by neo-tree, bufferline, lualine</td></tr>
+  </table>
+  <div class="callout tip">
+    <strong>snacks.nvim replaces many plugins:</strong> dashboard (replaces alpha/dashboard-nvim), picker (replaces telescope), terminal (replaces toggleterm), indent lines (replaces indent-blankline), word highlights (replaces illuminate), notifier (replaces nvim-notify), bigfile handling (auto-disables heavy features on huge files). One dependency instead of six.
+  </div>
+</section>
+
+<!-- LSP -->
+<section id="lsp">
+  <h2><span class="icon">🔧</span> LSP Setup</h2>
+  <div class="callout red">
+    <strong>Important — API change in Neovim 0.11+:</strong> The old <code>require('lspconfig').pyright.setup({})</code> pattern is <strong>deprecated and will be deleted</strong>. Your config will use the new native API: <code>vim.lsp.config()</code> + <code>vim.lsp.enable()</code>. nvim-lspconfig is still installed but only as a <em>data source</em> — it provides server definitions that Neovim's built-in LSP client reads automatically from its <code>lsp/</code> directory.
+  </div>
+
+  <h3>How the new API works</h3>
+  <pre><code><span class="cmt">-- Tell Neovim how to configure a server (merge with its lspconfig defaults):</span>
+<span class="fn">vim.lsp.config</span>(<span class="str">'lua_ls'</span>, {
+  settings = {
+    Lua = { workspace = { checkThirdParty = <span class="kw">false</span> } }
+  }
+})
+
+<span class="cmt">-- Enable auto-activation for that server:</span>
+<span class="fn">vim.lsp.enable</span>(<span class="str">'lua_ls'</span>)
+
+<span class="cmt">-- Apply capabilities to ALL servers (e.g. from blink.cmp):</span>
+<span class="fn">vim.lsp.config</span>(<span class="str">'*'</span>, {
+  capabilities = <span class="fn">require</span>(<span class="str">'blink.cmp'</span>).<span class="fn">get_lsp_capabilities</span>()
+})</code></pre>
+
+  <h3>LSP Servers by Language</h3>
+  <table>
+    <tr><th>Language</th><th>Server</th><th>Install via</th><th>Notes</th></tr>
+    <tr><td>C#</td><td><code>roslyn</code> (csharp-language-server)</td><td>Mason</td><td>Modern replacement for OmniSharp, works with Unity</td></tr>
+    <tr><td>Python</td><td><code>basedpyright</code></td><td>Mason</td><td>Modern fork of Pyright, stricter, actively maintained</td></tr>
+    <tr><td>TypeScript / JS</td><td><code>ts_ls</code></td><td>Mason</td><td>Official typescript-language-server</td></tr>
+    <tr><td>Rust</td><td><code>rust_analyzer</code></td><td><strong>rustup</strong></td><td>Always installed via <code>rustup component add rust-analyzer</code></td></tr>
+    <tr><td>Lua</td><td><code>lua_ls</code></td><td>Mason</td><td>lua-language-server, self-configures for Neovim API</td></tr>
+    <tr><td>Bash</td><td><code>bashls</code></td><td>Mason</td><td>bash-language-server</td></tr>
+  </table>
+
+  <h3>Adding a new language later</h3>
+  <p>Three steps: (1) find the server name in <code>:Mason</code>, install it, (2) add two lines to <code>lspconfig.lua</code>, (3) optionally add a formatter in <code>formatting.lua</code>. Done.</p>
+
+  <h3>Key LSP keybindings</h3>
+  <table class="kb-table">
+    <tr><th>Key</th><th>Action</th><th>Notes</th></tr>
+    <tr><td><code>gd</code></td><td>Go to definition</td><td>Opens in current window</td></tr>
+    <tr><td><code>gD</code></td><td>Go to declaration</td><td></td></tr>
+    <tr><td><code>gr</code></td><td>Go to references</td><td>Opens snacks picker list</td></tr>
+    <tr><td><code>gy</code></td><td>Go to type definition</td><td></td></tr>
+    <tr><td><code>gi</code></td><td>Go to implementation</td><td></td></tr>
+    <tr><td><code>K</code></td><td>Hover documentation</td><td>Press twice to enter hover float</td></tr>
+    <tr><td><code>&lt;leader&gt;cr</code></td><td>Rename symbol</td><td>Renames all references in project</td></tr>
+    <tr><td><code>&lt;leader&gt;ca</code></td><td>Code actions</td><td>Fixes, imports, etc.</td></tr>
+    <tr><td><code>&lt;leader&gt;cf</code></td><td>Format buffer</td><td>Via conform.nvim</td></tr>
+    <tr><td><code>]d</code> / <code>[d</code></td><td>Next / prev diagnostic</td><td></td></tr>
+    <tr><td><code>&lt;leader&gt;cd</code></td><td>Show diagnostic float</td><td>Full message for current line</td></tr>
+    <tr><td><code>&lt;leader&gt;xl</code></td><td>Open diagnostics list</td><td>All diagnostics in picker</td></tr>
+  </table>
+  <div class="callout warn">
+    <strong>Note:</strong> All LSP keybindings above are set only when an LSP client is actually attached to the buffer — they will not shadow global keys in filetypes with no language server.
+  </div>
+</section>
+
+<!-- COMPLETION -->
+<section id="completion">
+  <h2><span class="icon">✨</span> Completion &amp; Snippets</h2>
+  <p><strong>Choice: blink.cmp</strong> — the modern replacement for nvim-cmp. Written partly in Rust for its fuzzy matcher, significantly faster, better default UX, and built-in snippet support.</p>
+  <div class="grid-2">
+    <div class="card">
+      <h4>blink.cmp</h4>
+      <p style="font-size:13px;">Rust-powered fuzzy matching, ghost text, auto-brackets, signature help, built-in snippet expansion. No extra plugins needed for most use cases.</p>
+      <span class="badge badge-green">Recommended</span>
+    </div>
+    <div class="card">
+      <h4>nvim-cmp (alternative)</h4>
+      <p style="font-size:13px;">The predecessor. Still works, still maintained, but slower and requires more plugin glue (luasnip, cmp-nvim-lsp, cmp-buffer, etc.).</p>
+      <span class="badge badge-yellow">Legacy</span>
+    </div>
+  </div>
+
+  <h3>Completion sources enabled</h3>
+  <div class="tag-list">
+    <span class="badge badge-blue">LSP</span>
+    <span class="badge badge-blue">Snippets (friendly-snippets)</span>
+    <span class="badge badge-blue">Path</span>
+    <span class="badge badge-blue">Buffer</span>
+  </div>
+
+  <h3>Completion keybindings (in the menu)</h3>
+  <table class="kb-table">
+    <tr><th>Key</th><th>Action</th></tr>
+    <tr><td><code>Ctrl-y</code></td><td>Accept selected item</td></tr>
+    <tr><td><code>Ctrl-n</code> / <code>Ctrl-p</code></td><td>Next / previous item</td></tr>
+    <tr><td><code>Ctrl-e</code></td><td>Dismiss menu</td></tr>
+    <tr><td><code>Ctrl-Space</code></td><td>Open menu manually</td></tr>
+    <tr><td><code>Ctrl-k</code></td><td>Toggle signature help</td></tr>
+  </table>
+  <div class="callout">
+    <strong>Snippet preset:</strong> Using blink.cmp's built-in snippet engine with <code>rafamadriz/friendly-snippets</code>. No LuaSnip required unless you want to write custom snippets in the future — easy to add later.
+  </div>
+</section>
+
+<!-- FORMATTING -->
+<section id="formatting">
+  <h2><span class="icon">🎨</span> Formatting &amp; Linting</h2>
+  <h3>Formatting — conform.nvim</h3>
+  <p>Formatters run on <code>BufWritePre</code> (before save). Falls back to LSP formatting if no external formatter is configured for a filetype.</p>
+  <table>
+    <tr><th>Language</th><th>Formatter</th><th>Install</th><th>Notes</th></tr>
+    <tr><td>C#</td><td><code>csharpier</code></td><td><code>dotnet tool install csharpier</code></td><td>Opinionated, like prettier for C#</td></tr>
+    <tr><td>Python</td><td><code>ruff_format</code></td><td>Mason</td><td>ruff handles both formatting AND linting — blazing fast</td></tr>
+    <tr><td>TypeScript / JS</td><td><code>prettierd</code></td><td>Mason</td><td>prettierd is a daemon — much faster than prettier on repeated saves</td></tr>
+    <tr><td>Rust</td><td><code>rustfmt</code></td><td>rustup (included)</td><td>LSP fallback — rust_analyzer can call rustfmt</td></tr>
+    <tr><td>Lua</td><td><code>stylua</code></td><td>Mason</td><td>Standard Lua formatter</td></tr>
+    <tr><td>Bash</td><td><code>shfmt</code></td><td>Mason</td><td></td></tr>
+    <tr><td>JSON</td><td><code>prettierd</code></td><td>Mason</td><td></td></tr>
+    <tr><td>YAML / Markdown</td><td><code>prettierd</code></td><td>Mason</td><td></td></tr>
+  </table>
+
+  <h3>Linting — nvim-lint</h3>
+  <p>Linters run on <code>BufWritePost</code> and <code>BufReadPost</code>. Diagnostics appear inline and in the diagnostics list.</p>
+  <table>
+    <tr><th>Language</th><th>Linter</th><th>Install</th></tr>
+    <tr><td>Python</td><td><code>ruff</code></td><td>Mason</td></tr>
+    <tr><td>TypeScript / JS</td><td><code>eslint_d</code></td><td>Mason</td></tr>
+    <tr><td>Bash</td><td><code>shellcheck</code></td><td>Mason or <code>brew install shellcheck</code></td></tr>
+    <tr><td>Lua</td><td>Via lua_ls LSP</td><td>(built into server)</td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>Format on save:</strong> Enabled by default. A keymap <code>&lt;leader&gt;cf</code> also lets you format manually. You will be able to toggle format-on-save per project or per buffer if needed.
+  </div>
+</section>
+
+<!-- DEBUGGING -->
+<section id="debugging">
+  <h2><span class="icon">🐛</span> Debugging — nvim-dap</h2>
+  <p>nvim-dap implements the Debug Adapter Protocol (the same protocol VSCode uses). Each language needs its own debug adapter installed separately from the LSP server.</p>
+  <table>
+    <tr><th>Language</th><th>Debug Adapter</th><th>Install</th></tr>
+    <tr><td>C#</td><td>netcoredbg</td><td>Mason (<code>:MasonInstall netcoredbg</code>)</td></tr>
+    <tr><td>Python</td><td>debugpy</td><td>Mason (<code>:MasonInstall debugpy</code>)</td></tr>
+    <tr><td>TypeScript / Node</td><td>js-debug-adapter</td><td>Mason (<code>:MasonInstall js-debug-adapter</code>)</td></tr>
+    <tr><td>Rust</td><td>codelldb</td><td>Mason (<code>:MasonInstall codelldb</code>)</td></tr>
+  </table>
+
+  <h3>Debug keybindings</h3>
+  <table class="kb-table">
+    <tr><th>Key</th><th>Action</th></tr>
+    <tr><td><code>F5</code></td><td>Start / Continue debugging</td></tr>
+    <tr><td><code>F10</code></td><td>Step over</td></tr>
+    <tr><td><code>F11</code></td><td>Step into</td></tr>
+    <tr><td><code>F12</code></td><td>Step out</td></tr>
+    <tr><td><code>Shift-F5</code></td><td>Stop debugger</td></tr>
+    <tr><td><code>&lt;leader&gt;db</code></td><td>Toggle breakpoint</td></tr>
+    <tr><td><code>&lt;leader&gt;dB</code></td><td>Set conditional breakpoint</td></tr>
+    <tr><td><code>&lt;leader&gt;du</code></td><td>Toggle DAP UI (scopes / watches / call stack)</td></tr>
+    <tr><td><code>&lt;leader&gt;dr</code></td><td>Open DAP REPL</td></tr>
+    <tr><td><code>&lt;leader&gt;dl</code></td><td>Run last debug configuration</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <strong>Unity C# note:</strong> Unity uses Mono, not .NET Core. Debugging Unity projects requires a separate adapter (unity-debug or debugger-for-unity). This is more complex and should be set up as a separate step once the base config works.
+  </div>
+</section>
+
+<!-- GIT -->
+<section id="git">
+  <h2><span class="icon">🌿</span> Git Integration</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h4>gitsigns.nvim — buffer-level git</h4>
+      <p style="font-size:13px;">Shows added/changed/deleted lines in the sign column. Lets you stage/unstage individual hunks without leaving the file. Inline git blame. Hunk navigation with <code>]h</code> / <code>[h</code>.</p>
+    </div>
+    <div class="card">
+      <h4>neogit — repo-level git</h4>
+      <p style="font-size:13px;">Magit-inspired UI: stage files, write commit messages, push, pull, view log, manage branches. Keyboard-driven and extremely fast once you learn it.</p>
+    </div>
+  </div>
+
+  <h3>Git keybindings</h3>
+  <table class="kb-table">
+    <tr><th>Key</th><th>Action</th></tr>
+    <tr><td><code>]h</code> / <code>[h</code></td><td>Next / prev hunk</td></tr>
+    <tr><td><code>&lt;leader&gt;ghs</code></td><td>Stage hunk</td></tr>
+    <tr><td><code>&lt;leader&gt;ghu</code></td><td>Undo stage hunk</td></tr>
+    <tr><td><code>&lt;leader&gt;ghp</code></td><td>Preview hunk diff</td></tr>
+    <tr><td><code>&lt;leader&gt;ghb</code></td><td>Blame current line</td></tr>
+    <tr><td><code>&lt;leader&gt;gn</code></td><td>Open Neogit (git status)</td></tr>
+    <tr><td><code>&lt;leader&gt;gd</code></td><td>Open diff view for current file</td></tr>
+  </table>
+</section>
+
+<!-- UI -->
+<section id="ui">
+  <h2><span class="icon">🎨</span> UI &amp; Theme</h2>
+
+  <h3>Colorscheme: TokyoNight Night</h3>
+  <p>Deep dark background (#1a1b26), cool blue/purple palette, excellent plugin support (lualine, bufferline, neo-tree, gitsigns, noice, blink.cmp all have first-class TokyoNight integration). Actively maintained.</p>
+  <div class="callout tip">Switching theme later is a one-line change. Catppuccin Mocha is the strongest alternative if you prefer warmer tones.</div>
+
+  <h3>Statusline: lualine.nvim</h3>
+  <p>Components configured: mode indicator → git branch → diagnostics (errors/warnings) → filename + modified flag → LSP client name → filetype → line:col → progress percentage.</p>
+
+  <h3>Bufferline: bufferline.nvim</h3>
+  <p>Tab bar showing open buffers with icons, close buttons, diagnostic badges per buffer. Styled to match TokyoNight.</p>
+  <table class="kb-table">
+    <tr><th>Key</th><th>Action</th></tr>
+    <tr><td><code>&lt;leader&gt;,</code></td><td>Switch buffer (picker)</td></tr>
+    <tr><td><code>&lt;S-h&gt;</code></td><td>Previous buffer</td></tr>
+    <tr><td><code>&lt;S-l&gt;</code></td><td>Next buffer</td></tr>
+    <tr><td><code>&lt;leader&gt;bd</code></td><td>Delete/close buffer</td></tr>
+    <tr><td><code>&lt;leader&gt;bo</code></td><td>Delete all other buffers</td></tr>
+  </table>
+
+  <h3>noice.nvim — command line + notifications</h3>
+  <p>Replaces the bottom command line with a centered floating input. Shows LSP progress and messages as non-intrusive notifications in the top-right corner. Significantly improves the feel of the editor.</p>
+
+  <h3>Dashboard: snacks.dashboard</h3>
+  <p>Shown when Neovim opens with no file. Shows recent files, quick actions (find file, grep, new file, quit), and a small ASCII art header. To disable: comment out one line in <code>plugins/editor/snacks.lua</code>.</p>
+</section>
+
+<!-- NAVIGATION -->
+<section id="navigation">
+  <h2><span class="icon">🔍</span> File Navigation &amp; Search</h2>
+
+  <h3>Picker: snacks.picker</h3>
+  <p>Replaces Telescope. Faster, fewer dependencies, maintained by the same author as lazy.nvim. Fuzzy-finds files, grep, buffers, LSP symbols, git log, command history, and more.</p>
+  <table class="kb-table">
+    <tr><th>Key</th><th>Action</th></tr>
+    <tr><td><code>&lt;leader&gt;&lt;space&gt;</code></td><td>Smart find files (recent + project files)</td></tr>
+    <tr><td><code>&lt;leader&gt;ff</code></td><td>Find files in project</td></tr>
+    <tr><td><code>&lt;leader&gt;/</code></td><td>Live grep (search text in project)</td></tr>
+    <tr><td><code>&lt;leader&gt;fw</code></td><td>Grep word under cursor</td></tr>
+    <tr><td><code>&lt;leader&gt;fc</code></td><td>Find in config files</td></tr>
+    <tr><td><code>&lt;leader&gt;fr</code></td><td>Recent files</td></tr>
+    <tr><td><code>&lt;leader&gt;fs</code></td><td>LSP document symbols</td></tr>
+    <tr><td><code>&lt;leader&gt;fS</code></td><td>LSP workspace symbols</td></tr>
+    <tr><td><code>&lt;leader&gt;:</code></td><td>Command history</td></tr>
+    <tr><td><code>&lt;leader&gt;n</code></td><td>Notification history</td></tr>
+  </table>
+
+  <h3>Sidebar explorer: neo-tree.nvim</h3>
+  <p>Persistent left sidebar. Shows file tree with git status icons, diagnostics, and file icons. Can toggle on/off. Also has a buffers view and git status view.</p>
+  <table class="kb-table">
+    <tr><th>Key</th><th>Action</th></tr>
+    <tr><td><code>&lt;leader&gt;e</code></td><td>Toggle neo-tree sidebar</td></tr>
+    <tr><td><code>&lt;leader&gt;E</code></td><td>Focus neo-tree on current file</td></tr>
+  </table>
+  <p style="font-size:13px;color:var(--comment);">Inside neo-tree: <code>a</code> = add file, <code>d</code> = delete, <code>r</code> = rename, <code>m</code> = move, <code>c</code> = copy, <code>Enter</code> = open, <code>?</code> = help</p>
+
+  <h3>Split / window navigation</h3>
+  <table class="kb-table">
+    <tr><th>Key</th><th>Action</th></tr>
+    <tr><td><code>Ctrl-h/j/k/l</code></td><td>Move focus between splits</td></tr>
+    <tr><td><code>&lt;leader&gt;sv</code></td><td>Split vertically</td></tr>
+    <tr><td><code>&lt;leader&gt;sh</code></td><td>Split horizontally</td></tr>
+    <tr><td><code>&lt;leader&gt;sd</code></td><td>Close split</td></tr>
+    <tr><td><code>&lt;leader&gt;se</code></td><td>Equalize splits</td></tr>
+  </table>
+</section>
+
+<!-- KEYBINDINGS -->
+<section id="keybindings">
+  <h2><span class="icon">⌨️</span> Full Keybinding Strategy</h2>
+  <div class="callout">
+    <strong>Leader = Space.</strong> The strategy follows a mnemonic namespace pattern: <code>&lt;leader&gt;f</code> = find, <code>&lt;leader&gt;g</code> = git, <code>&lt;leader&gt;c</code> = code (LSP), <code>&lt;leader&gt;d</code> = debug, <code>&lt;leader&gt;s</code> = split, <code>&lt;leader&gt;b</code> = buffer, <code>&lt;leader&gt;x</code> = diagnostics/lists, <code>&lt;leader&gt;a</code> = AI. All keybindings are registered with which-key so pressing <code>&lt;leader&gt;</code> shows a popup of everything available.
+  </div>
+
+  <h3>Complete keybinding table</h3>
+  <table class="kb-table">
+    <tr><th>Key</th><th>Action</th><th>Mode</th></tr>
+    <!-- FILES -->
+    <tr><td colspan="3" style="color:var(--comment);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding-top:16px;">Find / Files</td></tr>
+    <tr><td><code>&lt;leader&gt;&lt;space&gt;</code></td><td>Smart find files</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;ff</code></td><td>Find files</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;fr</code></td><td>Recent files</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;/</code></td><td>Grep (live)</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;fw</code></td><td>Grep word under cursor</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;fc</code></td><td>Find config files</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;fs</code></td><td>Document symbols</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;fS</code></td><td>Workspace symbols</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;:</code></td><td>Command history</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;n</code></td><td>Notifications</td><td>n</td></tr>
+    <!-- BUFFERS -->
+    <tr><td colspan="3" style="color:var(--comment);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding-top:16px;">Buffers</td></tr>
+    <tr><td><code>&lt;leader&gt;,</code></td><td>Switch buffer (picker)</td><td>n</td></tr>
+    <tr><td><code>&lt;S-h&gt;</code></td><td>Previous buffer</td><td>n</td></tr>
+    <tr><td><code>&lt;S-l&gt;</code></td><td>Next buffer</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;bd</code></td><td>Delete buffer</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;bo</code></td><td>Delete other buffers</td><td>n</td></tr>
+    <!-- EXPLORER -->
+    <tr><td colspan="3" style="color:var(--comment);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding-top:16px;">Explorer</td></tr>
+    <tr><td><code>&lt;leader&gt;e</code></td><td>Toggle neo-tree</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;E</code></td><td>Reveal file in neo-tree</td><td>n</td></tr>
+    <!-- CODE / LSP -->
+    <tr><td colspan="3" style="color:var(--comment);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding-top:16px;">Code / LSP</td></tr>
+    <tr><td><code>gd</code></td><td>Go to definition</td><td>n</td></tr>
+    <tr><td><code>gD</code></td><td>Go to declaration</td><td>n</td></tr>
+    <tr><td><code>gr</code></td><td>References</td><td>n</td></tr>
+    <tr><td><code>gy</code></td><td>Type definition</td><td>n</td></tr>
+    <tr><td><code>gi</code></td><td>Go to implementation</td><td>n</td></tr>
+    <tr><td><code>K</code></td><td>Hover docs</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;cr</code></td><td>Rename symbol</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;ca</code></td><td>Code actions</td><td>n, v</td></tr>
+    <tr><td><code>&lt;leader&gt;cf</code></td><td>Format buffer</td><td>n, v</td></tr>
+    <tr><td><code>&lt;leader&gt;cd</code></td><td>Diagnostic float</td><td>n</td></tr>
+    <tr><td><code>]d</code> / <code>[d</code></td><td>Next / prev diagnostic</td><td>n</td></tr>
+    <tr><td><code>]e</code> / <code>[e</code></td><td>Next / prev error</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;xl</code></td><td>Diagnostics list</td><td>n</td></tr>
+    <!-- GIT -->
+    <tr><td colspan="3" style="color:var(--comment);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding-top:16px;">Git</td></tr>
+    <tr><td><code>]h</code> / <code>[h</code></td><td>Next / prev hunk</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;ghs</code></td><td>Stage hunk</td><td>n, v</td></tr>
+    <tr><td><code>&lt;leader&gt;ghu</code></td><td>Undo stage hunk</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;ghp</code></td><td>Preview hunk</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;ghb</code></td><td>Blame line</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;gn</code></td><td>Open Neogit</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;gd</code></td><td>Diff current file</td><td>n</td></tr>
+    <!-- DEBUG -->
+    <tr><td colspan="3" style="color:var(--comment);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding-top:16px;">Debug</td></tr>
+    <tr><td><code>F5</code></td><td>Start / Continue</td><td>n</td></tr>
+    <tr><td><code>Shift-F5</code></td><td>Stop</td><td>n</td></tr>
+    <tr><td><code>F10</code></td><td>Step over</td><td>n</td></tr>
+    <tr><td><code>F11</code></td><td>Step into</td><td>n</td></tr>
+    <tr><td><code>F12</code></td><td>Step out</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;db</code></td><td>Toggle breakpoint</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;dB</code></td><td>Conditional breakpoint</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;du</code></td><td>Toggle DAP UI</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;dr</code></td><td>DAP REPL</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;dl</code></td><td>Run last</td><td>n</td></tr>
+    <!-- SPLITS -->
+    <tr><td colspan="3" style="color:var(--comment);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding-top:16px;">Splits / Windows</td></tr>
+    <tr><td><code>Ctrl-h/j/k/l</code></td><td>Move between splits</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;sv</code></td><td>Split vertical</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;sh</code></td><td>Split horizontal</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;sd</code></td><td>Close split</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;se</code></td><td>Equalize splits</td><td>n</td></tr>
+    <!-- TERMINAL -->
+    <tr><td colspan="3" style="color:var(--comment);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding-top:16px;">Terminal</td></tr>
+    <tr><td><code>&lt;leader&gt;ft</code></td><td>Floating terminal</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;fT</code></td><td>Terminal in new split</td><td>n</td></tr>
+    <tr><td><code>Ctrl-\</code></td><td>Toggle floating terminal</td><td>n, t</td></tr>
+    <!-- AI -->
+    <tr><td colspan="3" style="color:var(--comment);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding-top:16px;">AI (avante)</td></tr>
+    <tr><td><code>&lt;leader&gt;aa</code></td><td>Open AI chat sidebar</td><td>n, v</td></tr>
+    <tr><td><code>&lt;leader&gt;ae</code></td><td>Edit selected code with AI</td><td>v</td></tr>
+    <tr><td><code>&lt;leader&gt;ar</code></td><td>Refresh AI chat</td><td>n</td></tr>
+    <!-- MISC -->
+    <tr><td colspan="3" style="color:var(--comment);font-size:11px;letter-spacing:1px;text-transform:uppercase;padding-top:16px;">Misc</td></tr>
+    <tr><td><code>&lt;Esc&gt;</code></td><td>Clear search highlight</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;w</code></td><td>Save file</td><td>n</td></tr>
+    <tr><td><code>&lt;leader&gt;q</code></td><td>Quit</td><td>n</td></tr>
+    <tr><td><code>jk</code></td><td>Exit insert mode (optional — tell me if you want this)</td><td>i</td></tr>
+    <tr><td><code>&lt;leader&gt;?</code></td><td>Which-key help</td><td>n</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <strong>Reminder:</strong> You said you want to set individual keybindings exactly how you want them. The table above is the proposed set of defaults. During implementation, we will go through each category and you can adjust anything before it gets written to code.
+  </div>
+</section>
+
+<!-- LANGUAGES -->
+<section id="languages">
+  <h2><span class="icon">🌐</span> Language Support Plan</h2>
+  <p>Each language requires: Treesitter parser + LSP server + optional formatter + optional linter + optional debug adapter. All can be installed independently — add a language when you need it.</p>
+
+  <table>
+    <tr><th>Language</th><th>Treesitter</th><th>LSP</th><th>Formatter</th><th>Linter</th><th>DAP</th></tr>
+    <tr>
+      <td>C#</td>
+      <td><span class="badge badge-green">c_sharp</span></td>
+      <td>roslyn</td>
+      <td>csharpier</td>
+      <td>roslyn built-in</td>
+      <td>netcoredbg</td>
+    </tr>
+    <tr>
+      <td>Python</td>
+      <td><span class="badge badge-green">python</span></td>
+      <td>basedpyright</td>
+      <td>ruff_format</td>
+      <td>ruff</td>
+      <td>debugpy</td>
+    </tr>
+    <tr>
+      <td>TypeScript</td>
+      <td><span class="badge badge-green">typescript</span></td>
+      <td>ts_ls</td>
+      <td>prettierd</td>
+      <td>eslint_d</td>
+      <td>js-debug-adapter</td>
+    </tr>
+    <tr>
+      <td>Rust</td>
+      <td><span class="badge badge-green">rust</span></td>
+      <td>rust_analyzer</td>
+      <td>rustfmt (LSP)</td>
+      <td>rust_analyzer built-in</td>
+      <td>codelldb</td>
+    </tr>
+    <tr>
+      <td>Lua</td>
+      <td><span class="badge badge-green">lua</span></td>
+      <td>lua_ls</td>
+      <td>stylua</td>
+      <td>lua_ls built-in</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>Bash</td>
+      <td><span class="badge badge-green">bash</span></td>
+      <td>bashls</td>
+      <td>shfmt</td>
+      <td>shellcheck</td>
+      <td>—</td>
+    </tr>
+  </table>
+
+  <h3>Adding a new language (future)</h3>
+  <pre><code><span class="cmt">-- 1. In lspconfig.lua, add two lines:</span>
+<span class="fn">vim.lsp.config</span>(<span class="str">'gopls'</span>, {})    <span class="cmt">-- use server defaults</span>
+<span class="fn">vim.lsp.enable</span>(<span class="str">'gopls'</span>)
+
+<span class="cmt">-- 2. In formatting.lua, add one entry:</span>
+go = { <span class="str">'gofmt'</span> },
+
+<span class="cmt">-- 3. Install: :MasonInstall gopls goimports</span>
+<span class="cmt">-- 4. Install treesitter: :TSInstall go</span></code></pre>
+</section>
+
+<!-- TERMINAL -->
+<section id="terminal">
+  <h2><span class="icon">💻</span> Terminal Integration</h2>
+  <p>Using <strong>snacks.terminal</strong> — a floating terminal toggled with <code>Ctrl-\</code> or <code>&lt;leader&gt;ft</code>. It remembers its state between toggles (the shell process stays alive). No separate toggleterm plugin needed.</p>
+  <div class="callout">
+    Since you use tmux alongside Kitty, the floating terminal inside Neovim is for quick one-off commands — running tests, git push, etc. For longer terminal sessions you can use your tmux panes directly. This keeps the boundary clean.
+  </div>
+</section>
+
+<!-- AI -->
+<section id="ai">
+  <h2><span class="icon">🤖</span> AI Tooling — avante.nvim</h2>
+  <p><strong>Recommendation: avante.nvim with Claude Sonnet.</strong> This is the closest thing to Cursor inside Neovim — it gives you a side panel to chat about code, inline diffs you can apply with a keypress, and agentic tool use.</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4>avante.nvim</h4>
+      <p style="font-size:13px;">Cursor-like sidebar + inline edits. Supports Claude, GPT, Copilot, Gemini, and local models. You already use Claude, so this is a natural fit.</p>
+      <span class="badge badge-green">Recommended</span>
+    </div>
+    <div class="card">
+      <h4>codecompanion.nvim (alternative)</h4>
+      <p style="font-size:13px;">More chat-focused, slightly less Cursor-like. More configurable but more setup. Good choice if you want fine-grained control over prompts.</p>
+      <span class="badge badge-yellow">Alternative</span>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Requires an Anthropic API key.</strong> Set <code>ANTHROPIC_API_KEY</code> in your shell environment (e.g. in <code>~/.zshrc</code> or via a secret manager). The config will read it automatically — no key is ever hardcoded in config files.
+  </div>
+
+  <h3>What avante can do</h3>
+  <ul style="padding-left:20px; color:var(--fg2); line-height:2; font-size:13px;">
+    <li>Chat in a sidebar about selected code or the full file</li>
+    <li>Generate diffs inline and let you accept/reject each change</li>
+    <li>Explain code, refactor, write tests, generate documentation</li>
+    <li>Read your project structure as context for more accurate answers</li>
+  </ul>
+</section>
+
+<!-- INSTALL -->
+<section id="install">
+  <h2><span class="icon">🚀</span> Installation Steps (Pre-config)</h2>
+  <p>These are steps to complete before writing any config code. Most are likely already done.</p>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h4>Verify Neovim version</h4>
+      <pre><code>nvim --version   <span class="cmt"># must be 0.10+, you have 0.12.2 ✓</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h4>Verify Nerd Font in Kitty</h4>
+      <p style="color:var(--fg2);font-size:13px;">Open Kitty and run <code>echo ""</code> — you should see a Nerd Font icon, not a box. MesloLGL is confirmed installed. Set it in Kitty config: <code>font_family MesloLGL Nerd Font</code></p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h4>Install Rust via rustup (if not already done)</h4>
+      <pre><code>curl --proto <span class="str">'=https'</span> --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup component add rust-analyzer</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h4>Install build dependencies for blink.cmp (Rust compilation)</h4>
+      <pre><code>brew install cmake   <span class="cmt"># if not present</span></code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <h4>Install ripgrep and fd (required by snacks picker)</h4>
+      <pre><code>brew install ripgrep fd</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-body">
+      <h4>Backup existing (empty) config</h4>
+      <pre><code>mv ~/.config/nvim ~/.config/nvim.bak 2>/dev/null || true</code></pre>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">7</div>
+    <div class="step-body">
+      <h4>Set ANTHROPIC_API_KEY in shell</h4>
+      <pre><code><span class="cmt"># Add to ~/.zshrc or ~/.bashrc:</span>
+export ANTHROPIC_API_KEY=<span class="str">"your-key-here"</span></code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- RISKS -->
+<section id="risks">
+  <h2><span class="icon">⚠️</span> Risks, Tradeoffs &amp; Alternatives</h2>
+  <table>
+    <tr><th>Risk / Tradeoff</th><th>Mitigation</th></tr>
+    <tr class="risk-row">
+      <td>vim.lsp.config API is very new — fewer tutorials online</td>
+      <td>We will write fully documented code. Official Neovim docs are the authoritative source.</td>
+    </tr>
+    <tr class="risk-row">
+      <td>blink.cmp requires a Rust build step</td>
+      <td>lazy.nvim handles this automatically. If it fails, we fall back to the Lua implementation (one config line change).</td>
+    </tr>
+    <tr class="risk-row">
+      <td>snacks.picker vs Telescope — less ecosystem history</td>
+      <td>snacks.picker is made by folke (lazy.nvim author), very actively maintained. If a feature is missing, Telescope is a drop-in alternative.</td>
+    </tr>
+    <tr class="risk-row">
+      <td>avante.nvim is fast-moving — APIs change frequently</td>
+      <td>lazy-lock.json pins the exact version. We upgrade explicitly, not automatically.</td>
+    </tr>
+    <tr class="risk-row">
+      <td>Unity C# debugging is complex (Mono vs .NET Core)</td>
+      <td>Base C# debugging with netcoredbg works for non-Unity code. Unity debugging is scoped as a future optional step.</td>
+    </tr>
+    <tr class="risk-row">
+      <td>noice.nvim can occasionally conflict with other UI plugins</td>
+      <td>Easy to disable — it is isolated in its own file. The rest of the config works without it.</td>
+    </tr>
+    <tr class="risk-row">
+      <td>Many plugins from same author (folke) — single point of failure</td>
+      <td>All folke plugins are best-in-class and have large communities. Alternatives documented above for each.</td>
+    </tr>
+  </table>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <h2><span class="icon">🗺️</span> Implementation Roadmap</h2>
+  <p>We implement together, one phase at a time. Each phase ends with a working, testable state before moving on.</p>
+
+  <div class="roadmap-phase">
+    <div class="phase-label">Phase 1</div>
+    <h4>Foundation — init.lua, options, keymaps, lazy.nvim bootstrap</h4>
+    <ul>
+      <li>Create <code>~/.config/nvim/init.lua</code></li>
+      <li>Load <code>config/options.lua</code> (sensible defaults, no magic)</li>
+      <li>Load <code>config/keymaps.lua</code> (non-plugin bindings)</li>
+      <li>Load <code>config/autocmds.lua</code> (highlight on yank, restore cursor position, etc.)</li>
+      <li>Bootstrap lazy.nvim</li>
+      <li><strong>Test:</strong> Neovim opens cleanly, no errors, leader key works</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-phase phase-2">
+    <div class="phase-label">Phase 2</div>
+    <h4>UI — colorscheme, statusline, bufferline, dashboard, noice</h4>
+    <ul>
+      <li>Install tokyonight, lualine, bufferline, snacks.nvim, noice.nvim</li>
+      <li>Configure each in its own file</li>
+      <li><strong>Test:</strong> Editor looks correct, dashboard on startup, statusline shows info, buffer tabs visible</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-phase phase-3">
+    <div class="phase-label">Phase 3</div>
+    <h4>Editor core — Treesitter, neo-tree, snacks picker, which-key, mini</h4>
+    <ul>
+      <li>Install and configure Treesitter with all 6 language parsers</li>
+      <li>Configure neo-tree sidebar</li>
+      <li>Configure snacks picker (files, grep, buffers)</li>
+      <li>Configure which-key with all namespaces</li>
+      <li>Configure mini.pairs, mini.surround, mini.ai</li>
+      <li><strong>Test:</strong> File navigation works, syntax highlighting correct, keybinding hints appear</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-phase phase-4">
+    <div class="phase-label">Phase 4</div>
+    <h4>LSP — mason, server configs, LSP keymaps</h4>
+    <ul>
+      <li>Install mason.nvim + mason-lspconfig.nvim</li>
+      <li>Write <code>lspconfig.lua</code> using <code>vim.lsp.config</code> + <code>vim.lsp.enable</code></li>
+      <li>Enable: lua_ls, basedpyright, ts_ls, rust_analyzer, roslyn, bashls</li>
+      <li>Set up on_attach keymaps (gd, gr, K, etc.)</li>
+      <li><strong>Test:</strong> Open a Python file — completions appear, <code>gd</code> jumps to definition</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-phase phase-5">
+    <div class="phase-label">Phase 5</div>
+    <h4>Completion &amp; Snippets — blink.cmp</h4>
+    <ul>
+      <li>Install blink.cmp + friendly-snippets</li>
+      <li>Wire blink capabilities into LSP config</li>
+      <li>Configure sources, keymap preset, ghost text, signature help</li>
+      <li><strong>Test:</strong> Completion menu appears, snippets expand, signature help shows on function calls</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-phase phase-6">
+    <div class="phase-label">Phase 6</div>
+    <h4>Formatting &amp; Linting — conform, nvim-lint</h4>
+    <ul>
+      <li>Install conform.nvim + nvim-lint</li>
+      <li>Configure formatters per filetype</li>
+      <li>Enable format on save</li>
+      <li>Configure linters, set up autocmd to lint on save</li>
+      <li><strong>Test:</strong> Save a Python file — ruff lints it, ruff_format formats it</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-phase phase-7">
+    <div class="phase-label">Phase 7</div>
+    <h4>Git — gitsigns, neogit</h4>
+    <ul>
+      <li>Install and configure gitsigns.nvim</li>
+      <li>Install and configure neogit</li>
+      <li>Set up all git keymaps</li>
+      <li><strong>Test:</strong> Open a file in a git repo — hunk indicators appear, <code>&lt;leader&gt;gn</code> opens Neogit</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-phase" style="border-left-color: var(--red);">
+    <div class="phase-label">Phase 8</div>
+    <h4>Debugging — nvim-dap, dap-ui, mason-nvim-dap</h4>
+    <ul>
+      <li>Install nvim-dap + nvim-dap-ui + mason-nvim-dap</li>
+      <li>Configure adapters for Python, TypeScript, Rust, C#</li>
+      <li>Set up all debug keymaps (F5, F10, etc.)</li>
+      <li><strong>Test:</strong> Set a breakpoint in a Python file, start debugger, step through code</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-phase" style="border-left-color: var(--teal);">
+    <div class="phase-label">Phase 9</div>
+    <h4>AI — avante.nvim</h4>
+    <ul>
+      <li>Install avante.nvim</li>
+      <li>Configure Claude Sonnet as provider</li>
+      <li>Set up keymaps (<code>&lt;leader&gt;aa</code>, <code>&lt;leader&gt;ae</code>)</li>
+      <li><strong>Test:</strong> Select code, press <code>&lt;leader&gt;ae</code>, ask for a refactor, apply the diff</li>
+    </ul>
+  </div>
+
+  <div class="roadmap-phase" style="border-left-color: var(--comment);">
+    <div class="phase-label">Phase 10</div>
+    <h4>Polish &amp; tuning</h4>
+    <ul>
+      <li>Review startup time (<code>:Lazy profile</code>)</li>
+      <li>Adjust any keybindings that feel wrong in practice</li>
+      <li>Add any missing language support</li>
+      <li>Commit <code>lazy-lock.json</code> to git for reproducibility</li>
+    </ul>
+  </div>
+</section>
+
+<!-- APPROVAL -->
+<section id="approval">
+  <div class="approval-box">
+    <h3>✅ Ready for your approval</h3>
+    <p>Review the plan above. Tell me what you want to change, add, or remove.</p>
+    <p style="margin-top:8px;">Once you approve, we start with <strong>Phase 1</strong> — building the foundation together, step by step.</p>
+    <p style="margin-top:16px; color:var(--comment); font-size:12px;">
+      Things to specifically check: keybindings you want different · AI provider preference · any plugin you want swapped out · anything missing for your workflow
+    </p>
+  </div>
+</section>
+
+</main>
+
+<script>
+  // Highlight active nav item on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
