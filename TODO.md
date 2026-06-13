@@ -1,0 +1,1 @@
+- [x] I want to fix neo-tree so it works like vscode/cursor

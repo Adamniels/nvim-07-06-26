@@ -127,12 +127,12 @@ return {
 
     -- Picker — files
     { "<leader><space>", function() Snacks.picker.smart() end,                                   desc = "Smart Find Files" },
-    { "<leader>ff",      function() Snacks.picker.files() end,                                   desc = "Find Files" },
+    { "<F13>a",          function() Snacks.picker.files() end,                                   desc = "Find Files" },
     { "<leader>fr",      function() Snacks.picker.recent() end,                                  desc = "Recent Files" },
     { "<leader>fc",      function() Snacks.picker.files({ cwd = vim.fn.stdpath("config") }) end, desc = "Find Config File" },
 
     -- Picker — grep
-    { "<leader>/",  function() Snacks.picker.grep() end,                       desc = "Grep" },
+    { "<F13>g",     function() Snacks.picker.grep() end,                       desc = "Grep" },
     { "<leader>fw", function() Snacks.picker.grep_word() end, mode = { "n", "x" }, desc = "Grep Word/Selection" },
 
     -- Picker — buffers & misc

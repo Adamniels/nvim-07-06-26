@@ -52,9 +52,9 @@ map("n", "<C-l>", "<C-w>l", { desc = "Focus right split" })
 
 -- Split management
 map("n", "<leader>sv", "<cmd>vsplit<CR>", { desc = "Split vertical" })
-map("n", "<leader>sh", "<cmd>split<CR>",  { desc = "Split horizontal" })
-map("n", "<leader>sd", "<cmd>close<CR>",  { desc = "Close split" })
-map("n", "<leader>se", "<C-w>=",          { desc = "Equalize splits" })
+map("n", "<leader>sh", "<cmd>split<CR>", { desc = "Split horizontal" })
+map("n", "<leader>sd", "<cmd>close<CR>", { desc = "Close split" })
+map("n", "<leader>se", "<C-w>=", { desc = "Equalize splits" })
 
 -- =============================================================================
 -- Buffer navigation
@@ -62,8 +62,8 @@ map("n", "<leader>se", "<C-w>=",          { desc = "Equalize splits" })
 
 -- Shift+h/l to move between buffers — mirrors how you'd move between tabs in VSCode.
 -- The bufferline plugin also lets you click tabs, but keyboard is faster.
-map("n", "<S-h>", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
-map("n", "<S-l>", "<cmd>bnext<CR>",     { desc = "Next buffer" })
+map("n", "<F13>p", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
+map("n", "<F13>n", "<cmd>bnext<CR>", { desc = "Next buffer" })
 
 -- =============================================================================
 -- Visual mode improvements
@@ -72,7 +72,7 @@ map("n", "<S-l>", "<cmd>bnext<CR>",     { desc = "Next buffer" })
 -- Move selected lines up/down and re-indent automatically.
 -- In VSCode this is Alt+Up/Down. Here it's J/K in visual mode.
 map("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selection down", silent = true })
-map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up",   silent = true })
+map("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up", silent = true })
 
 -- Stay in visual mode after indenting.
 -- Without this, < and > in visual mode drop you back to normal mode so you
