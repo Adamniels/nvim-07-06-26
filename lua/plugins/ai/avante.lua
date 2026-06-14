@@ -80,8 +80,8 @@ return {
       claude = {
         endpoint = "https://api.anthropic.com",
         model    = "claude-sonnet-4-6",
+        timeout  = 30000, -- ms before giving up on a request (provider-level, NOT request body)
         extra_request_body = {
-          timeout     = 30000, -- ms before giving up on a request
           temperature = 0,     -- 0 = deterministic, precise answers
           max_tokens  = 8096,
         },
