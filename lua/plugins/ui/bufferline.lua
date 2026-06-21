@@ -20,6 +20,11 @@ return {
 
   opts = {
     options = {
+      -- "tabs" mode: the top bar shows Neovim TABPAGES, not buffers.
+      -- Opening a file swaps the content of the current tab instead of adding
+      -- a new entry. A new tab only appears when you create one (:tabnew).
+      mode = "tabs",
+
       -- Show LSP diagnostic counts on each buffer tab
       diagnostics = "nvim_lsp",
       diagnostics_indicator = function(_, _, diag)

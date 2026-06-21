@@ -60,10 +60,13 @@ map("n", "<leader>se", "<C-w>=", { desc = "Equalize splits" })
 -- Buffer navigation
 -- =============================================================================
 
--- Shift+h/l to move between buffers — mirrors how you'd move between tabs in VSCode.
--- The bufferline plugin also lets you click tabs, but keyboard is faster.
-map("n", "<F13>p", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
-map("n", "<F13>n", "<cmd>bnext<CR>", { desc = "Next buffer" })
+-- Move between tabs (tabpages). bufferline runs in "tabs" mode, so the top bar
+-- shows one entry per tab you've created. Opening a file swaps the current tab's
+-- content; a new tab only appears when you make one with <F13>c.
+map("n", "<F13>p", "<cmd>tabprevious<CR>", { desc = "Previous tab" })
+map("n", "<F13>n", "<cmd>tabnext<CR>", { desc = "Next tab" })
+map("n", "<F13>c", "<cmd>tabnew<CR>", { desc = "New tab" })
+map("n", "<F13>w", "<cmd>tabclose<CR>", { desc = "Close tab" })
 
 -- =============================================================================
 -- Visual mode improvements

@@ -67,8 +67,8 @@ return {
 			filtered_items = {
 				visible = false,
 				hide_dotfiles = false, -- show .env, .gitignore, .github etc.
-				hide_gitignored = true, -- but hide what git ignores (node_modules etc.)
-				hide_hidden = true, -- macOS/Windows hidden files
+				hide_gitignored = false, -- show gitignored files too (node_modules etc.)
+				hide_hidden = false, -- show macOS/Windows hidden files
 			},
 		},
 
