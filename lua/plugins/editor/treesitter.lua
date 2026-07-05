@@ -81,8 +81,16 @@ return {
         vim.wo.foldmethod = "expr"
         vim.wo.foldexpr   = "v:lua.vim.treesitter.foldexpr()"
 
-        -- Indentation based on the AST — smarter than regex-based filetype indent
-        vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        -- Indentation based on the AST — smarter than regex-based filetype indent.
+        -- Only enable it when the parser actually ships an `indents` query.
+        -- Some parsers (notably c_sharp) have no indents.scm, in which case
+        -- indentexpr() returns -1 and effectively kills auto-indent. Setting it
+        -- anyway would also clobber Neovim's built-in filetype indent (e.g.
+        -- indent/cs.vim → cindent), so we leave those buffers to fall back to it.
+        local lang = vim.treesitter.language.get_lang(vim.bo[event.buf].filetype) or event.match
+        if vim.treesitter.query.get(lang, "indents") then
+          vim.bo[event.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
       end,
     })
   end,

@@ -16,6 +16,7 @@ vim.g.maplocalleader = " "
 require("config.options")
 require("config.keymaps")
 require("config.autocmds")
+require("config.dotnet-debug") -- plugin-free <leader>td for C# (see the file for why)
 
 -- =============================================================================
 -- Bootstrap lazy.nvim

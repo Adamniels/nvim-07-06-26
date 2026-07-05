@@ -148,9 +148,18 @@ return {
       -- ========================================================================
       -- Install: auto-installed by mason-nvim-dap (see below)
       -- You need to build your project first: dotnet build
+      -- Prefer the hand-installed native build over Mason's.
+      -- Mason ships an x86_64 netcoredbg 3.1.3, which (a) can't attach to arm64
+      -- .NET processes on Apple Silicon and (b) predates .NET 10 — both surface
+      -- as "Failed command 'configurationDone' : 0x80131c3c". The arm64 3.2.0
+      -- build from Samsung/netcoredbg releases fixes both.
+      -- Install/update: download netcoredbg-osx-arm64.zip from the latest release
+      -- into ~/.local/share/netcoredbg/ (unzips to netcoredbg/netcoredbg).
+      local netcoredbg_native = vim.fn.expand("~/.local/share/netcoredbg/netcoredbg/netcoredbg")
       dap.adapters.coreclr = {
         type    = "executable",
-        command = mason_path("netcoredbg", "netcoredbg") or "netcoredbg",
+        command = (vim.fn.executable(netcoredbg_native) == 1) and netcoredbg_native
+                  or mason_path("netcoredbg", "netcoredbg") or "netcoredbg",
         args    = { "--interpreter=vscode" },
       }
 
@@ -159,9 +168,23 @@ return {
           type    = "coreclr",
           request = "launch",
           name    = "Launch .NET app",
-          -- Prompts you to choose the compiled .dll — build first with `dotnet build`
+          -- Prompts you to choose the compiled .dll — build first with `dotnet build`.
+          -- Launch the executable project's dll (OutputType=Exe), not a library dll.
           program = function()
-            return vim.fn.input("Path to dll: ", vim.fn.getcwd() .. "/bin/Debug/", "file")
+            return vim.fn.input("Path to dll: ", vim.fn.getcwd() .. "/", "file")
+          end,
+          cwd     = "${workspaceFolder}",
+        },
+        {
+          type    = "coreclr",
+          request = "launch",
+          name    = "Launch .NET app with args",
+          program = function()
+            return vim.fn.input("Path to dll: ", vim.fn.getcwd() .. "/", "file")
+          end,
+          args    = function()
+            local input = vim.fn.input("Args: ")
+            return vim.split(input, " ", { plain = true, trimempty = true })
           end,
           cwd     = "${workspaceFolder}",
         },
@@ -225,6 +248,31 @@ return {
       map("<leader>dl", dap.run_last,     "Debug: Run Last")
       map("<leader>dr", dap.repl.open,    "Debug: Open REPL")
       map("<leader>dx", dap.terminate,    "Debug: Terminate")
+
+      -- ========================================================================
+      -- Project-local launch configs (.vscode/launch.json)
+      -- ========================================================================
+      -- If the project has a .vscode/launch.json, its configurations show up in
+      -- the <F5> picker automatically — no need to retype dll paths or args each
+      -- session. This is the portable, per-project way to launch an app: the
+      -- same file works in VS Code, and it lives in the repo.
+      --
+      -- The map below tells dap which VS Code "type" applies to which filetypes.
+      local ok_vscode, vscode = pcall(require, "dap.ext.vscode")
+      if ok_vscode then
+        local load_launchjs = function()
+          vscode.load_launchjs(nil, {
+            coreclr     = { "cs", "fsharp" },
+            ["pwa-node"] = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
+            python      = { "python" },
+            codelldb    = { "rust", "c", "cpp" },
+          })
+        end
+        load_launchjs()
+        -- Reload when you change directory (e.g. open a different project)
+        vim.api.nvim_create_autocmd("DirChanged", { callback = load_launchjs })
+        map("<leader>dc", load_launchjs, "Debug: Reload launch.json")
+      end
     end,
   },
 
@@ -248,7 +296,14 @@ return {
       },
       -- Don't auto-configure adapters — we do it manually above so we have
       -- full control over each adapter's settings.
-      handlers = {},
+      -- NOTE: an empty table is NOT enough. mason-nvim-dap falls back to its
+      -- default_setup for every installed adapter, which would re-register
+      -- dap.adapters.coreclr to Mason's (x86_64, outdated) netcoredbg and
+      -- clobber our native arm64 override. A no-op handler for coreclr tells
+      -- mason-nvim-dap to leave it alone.
+      handlers = {
+        coreclr = function() end,
+      },
     },
   },
 }
