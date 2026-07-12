@@ -14,7 +14,7 @@ return {
 
   opts = {
     options = {
-      theme = "tokyonight",
+      theme = "codedark",
       -- Powerline-style separators. These use Nerd Font glyphs.
       -- If you ever switch to a non-Nerd Font, change these to "" (empty string).
       component_separators = { left = "", right = "" },
