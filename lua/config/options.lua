@@ -58,6 +58,8 @@ opt.wrap = false            -- Don't wrap long lines — scroll horizontally ins
 opt.colorcolumn = "120"     -- Show a subtle vertical line at column 120
 opt.showmode = false        -- Don't show "-- INSERT --" etc. — lualine handles this
 opt.pumheight = 10          -- Max 10 items in completion popup before it scrolls
+opt.fillchars:append({ eob = " " }) -- Hide the "~" filler glyphs on empty lines past EOF
+                            -- (with transparent=true they don't blend with the terminal bg)
 
 -- =============================================================================
 -- Search

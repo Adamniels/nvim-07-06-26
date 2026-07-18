@@ -153,8 +153,7 @@ return {
       -- .NET processes on Apple Silicon and (b) predates .NET 10 — both surface
       -- as "Failed command 'configurationDone' : 0x80131c3c". The arm64 3.2.0
       -- build from Samsung/netcoredbg releases fixes both.
-      -- Install/update: download netcoredbg-osx-arm64.zip from the latest release
-      -- into ~/.local/share/netcoredbg/ (unzips to netcoredbg/netcoredbg).
+      -- Install/update: run scripts/install-netcoredbg.sh from the repo root.
       local netcoredbg_native = vim.fn.expand("~/.local/share/netcoredbg/netcoredbg/netcoredbg")
       dap.adapters.coreclr = {
         type    = "executable",
