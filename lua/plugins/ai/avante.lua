@@ -92,9 +92,11 @@ return {
 		-- Behaviour
 		-- =========================================================================
 		behaviour = {
-			-- Show inline (ghost-text) suggestions as you type, Copilot-style.
-			-- Accept / cycle them with the `suggestion` mappings below.
-			auto_suggestions = true,
+			-- Inline (ghost-text) suggestions as you type, Copilot-style.
+			-- Off by default — it was firing API calls (and the key prompt) on
+			-- every buffer. Flip to true if you want it back; trigger manually
+			-- via <leader>aa / <leader>ae in the meantime.
+			auto_suggestions = false,
 
 			auto_set_highlight_group = true,
 			auto_set_keymaps = true,
